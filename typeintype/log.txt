@@ -1,0 +1,9 @@
+080602: Testing --type-in-type
+
+  Testing --type-in-type as a work-around for the lack of universe
+  polymorphism in Agda.
+
+  I copied the modules Sets.agda and Relations.agda, added the
+  --type-in-type flag and removed all code duplication. It seems to
+  work as expected, but if we apply this transformation there is no
+  (easy) way back.
