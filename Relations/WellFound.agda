@@ -42,11 +42,7 @@ private
 acc-fold : {a : Set} (R : a → a → Set) {P : a → Set} →
   ((x : a) → (∀ y → R y x → P y) → P x) →
      (x : a) → Acc R x → P x
-acc-fold R {P} f x accx = f x g
-  where g : ∀ y → R y x → P y
-        g with accx
-        ... | acc .x h = (λ y yRx → acc-fold R f y (h y yRx)) 
-{-
+acc-fold R f x (acc .x h) = f x (λ y yRx → acc-fold R f y (h y yRx))
 
 The auxiliary function g in acc-fold could be written inline
 like this:
