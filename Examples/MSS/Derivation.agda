@@ -6,8 +6,7 @@ module Examples.MSS.Derivation
   (_+_ : Val → Val → Val)
   (_↑_ : Val → Val → Val) 
   (↑assoc :  ∀ a b c → ((a ↑ b) ↑ c)  ≡ (a ↑ (b ↑ c)))
-  (+distr↑ : ∀ a b c → ((a + (b ↑ c)) ≡ ((a + b) ↑ (a + c))))
-where
+  (+distr↑ : ∀ a b c → ((a + (b ↑ c)) ≡ ((a + b) ↑ (a + c)))) where
 
 open import Function using (id; _∘_)
 open import Data.Product  using (Σ; ∃; _,_; proj₁; proj₂)

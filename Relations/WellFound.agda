@@ -44,6 +44,7 @@ acc-fold : {a : Set} (R : a → a → Set) {P : a → Set} →
      (x : a) → Acc R x → P x
 acc-fold R f x (acc .x h) = f x (λ y yRx → acc-fold R f y (h y yRx))
 
+{-
 The auxiliary function g in acc-fold could be written inline
 like this:
 
