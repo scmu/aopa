@@ -54,15 +54,15 @@ foldT-universal-⊒ S R e S○fork⊒RidSS ℰSnull⊇e =
     (⇐-begin
        foldT R e ⊑ S
      ⇐⟨ ⇐-refl ⟩
-        ∈ ₁∘ foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) e ⊑ S
+        ∈ ₁∘ foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) e ⊑ S
      ⇐⟨ Λ∈-galois-2 ⟩
-      foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) e ⊑ Λ S
+      foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) e ⊑ Λ S
      ⇐∎) foldt⊑ΛS
   where
-   foldt⊑ΛS : foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) e ⊑ Λ S
-   foldt⊑ΛS Null = 
+   foldt⊑ΛS : foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) e ⊑ Λ S
+   foldt⊑ΛS Null =
       ⊆-begin 
-          foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) e Null  
+          foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) e Null  
       ⊆⟨ ⊆-refl ⟩
           e 
       ⊆⟨ ℰSnull⊇e ⟩
@@ -71,22 +71,22 @@ foldT-universal-⊒ S R e S○fork⊒RidSS ℰSnull⊇e =
           Λ S Null
       ⊆∎       
      where ℰSnull⊆ΛSNull :  ℰ S null ⊆ Λ S Null
-           ℰSnull⊆ΛSNull b (.Null , ≡-refl , bSNull) = bSNull 
+           ℰSnull⊆ΛSNull b (.Null , refl , bSNull) = bSNull
 
    foldt⊑ΛS (Fork a t u) = 
      let induction-hypothesis₁ = foldt⊑ΛS t
          induction-hypothesis₂ = foldt⊑ΛS u
      in
         ⊆-begin 
-           foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) e (Fork a t u)
+           foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) e (Fork a t u)
         ⊆⟨ ⊆-refl ⟩
-           Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))
-             (a ,₁ foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) e t ₁,₁
-                   foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) e u)
-        ⊆⟨ Λ₁⨉⨉-monotonic R induction-hypothesis₁
+           Λ (R ○ (idR ⨉ ∈ ⨉ ∈))
+             (a , foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) e t ,
+                   foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) e u)
+        ⊆⟨ Λ⨉⨉-monotonic R induction-hypothesis₁
                              induction-hypothesis₂ a  ⟩
-           Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈)) (a ,₁ Λ S t ₁,₁ Λ S u)
-        ⊆⟨ Λ₁⨉⨉-absorption-⊆ R S S a t u  ⟩
+           Λ (R ○ (idR ⨉ ∈ ⨉ ∈)) (a , Λ S t , Λ S u)
+        ⊆⟨ Λ⨉⨉-absorption-⊆ R S S a t u  ⟩
           Λ (R ○ (idR ⨉ S ⨉ S)) (a , t , u)
         ⊆⟨ Λ-monotonic S○fork⊒RidSS (a , t , u) ⟩
           Λ (S ○ fork) (a , t , u)
@@ -94,8 +94,8 @@ foldT-universal-⊒ S R e S○fork⊒RidSS ℰSnull⊇e =
           Λ S (Fork a t u)
         ⊆∎ 
     where ΛSfork⊆SFork : Λ (S ○ fork) (a , t , u) ⊆ Λ S (Fork a t u)
-          ΛSfork⊆SFork b (._ , ≡-refl , bSFork) = bSFork 
-
+          ΛSfork⊆SFork b (._ , refl , bSFork) = bSFork
+{- SCM: Please update the proofs below.
 foldT-universal-⊑ : {A B : Set} →
   (S : B ← Tree A) → (R : B ← (A × B × B)) → (e : ℙ B) →
     (S ○ fork ⊑ R ○ (idR ⨉ S ⨉ S)) → (ℰ S null ⊆ e) →
@@ -323,3 +323,5 @@ foldT-monotonic {A}{B}{R₁}{R₂}{S₁}{S₂} R₁⊒R₂ S₁⊇S₂ =
           (Fork a t u , ≡-refl , 
               (a' , b₁ , b₂) , (a≡a' , b₁foldTt , b₂foldTu) ,
                                      R₁⊒R₂ b (a' , b₁ , b₂) bR₂a'b₁b₂)
+
+-}
