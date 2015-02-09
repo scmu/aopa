@@ -1,21 +1,23 @@
 module Data.Tree.Fold where
 
 open import Data.Empty using (⊥)
-open import Data.Function using (id)
+open import Function using (id)
 open import Data.Unit using (⊤; tt)
 open import Data.Product using (Σ; _×_; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 
-open import Sets
-     using (ℙ; _⊆_; _⊇_; ⊆-refl; ⊇-refl; singleton;
-            _≡_; ≡-refl; ≡-trans; ≡-cong; ≡-subst; ≡-sym)
+open import Sets 
+     using (ℙ; singleton;
+            _⊆_; ⊆-refl;
+            _⊇_; ⊇-refl;
+            _≡_; refl; trans; cong; subst; sym)
 open import Relations
 open import Relations.PowerTrans
      using (Λ∈-galois-1; Λ∈-galois-2; Λ-monotonic; ℰ-functor-⊆;
             ℰ-functor-⊇; ℰ-monotonic')
 open import Relations.Product
-     using (Λ₁⨉⨉-monotonic; Λ₁⨉⨉-absorption-⊆; Λ₁⨉⨉-absorption-⊇;
-            ⨉3-functor-⊑; ⨉3-functor-⊒; ⨉-monotonic; ⨉3-id-⊑)
+ --    using (Λ₁⨉⨉-monotonic; Λ₁⨉⨉-absorption-⊆; Λ₁⨉⨉-absorption-⊇;
+ --           ⨉3-functor-⊑; ⨉3-functor-⊒; ⨉-monotonic; ⨉3-id-⊑)
 open import Relations.CompChain
 
 open import AlgebraicReasoning.Sets
@@ -23,15 +25,14 @@ open import AlgebraicReasoning.Sets
             ⊇-begin_; _⊇⟨_⟩_; _⊇∎)
 open import AlgebraicReasoning.Relations
      using (⊑-begin_; _⊑⟨_⟩_; _⊑∎;
-            ⊒-begin_; _⊒⟨_⟩_; _⊒∎;
-            ⊒₁-begin_; _⊒₁⟨_⟩_; _⊒₁∎ )
+            ⊒-begin_; _⊒⟨_⟩_; _⊒∎)
 open import AlgebraicReasoning.Implications
 
 open import Data.Tree
 
 
 foldT : {A B : Set} → (B ← (A × B × B)) → ℙ B → (B ← Tree A)
-foldT R s = ∈ ₁∘ foldt₁ (Λ₁ (R ○₁ (idR ⨉₁ ∈ ₁⨉₁ ∈))) s
+foldT R s = ∈ ₁∘ foldt (Λ (R ○ (idR ⨉ ∈ ⨉ ∈))) s
 
 -- initial algebras
 

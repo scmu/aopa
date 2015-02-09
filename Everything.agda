@@ -36,8 +36,8 @@ import Data.List.ConvFunThm
 import Data.List.GreedyThm
 import Data.List.HyloThm
 import Data.List.Utilities
-{- To be updated 
 import Data.Tree
+{- To be updated 
 import Data.Tree.Fold
 import Data.Tree.Unfold
 -}
