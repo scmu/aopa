@@ -5,8 +5,9 @@ open import Data.Empty
 open import Data.Unit using (⊤)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_)
+open import Data.Nat hiding (fold)
 open import Function using (_∘_; id)
-open import Level renaming (_⊔_ to _⊔ℓ_)
+open import Level hiding (zero; suc) renaming (_⊔_ to _⊔ℓ_)
 
 open import Relations
 
@@ -47,6 +48,32 @@ mutual
    In : ⟦ F ⟧ A (μ F A) → μ F A
 
 
+-- example: rose tree
+
+RoseF : PolyF
+RoseF = arg₁ ⊗ fix (one ⊕ (arg₁ ⊗ arg₂))
+
+RoseT : Set
+RoseT = μ RoseF ℕ
+
+nil :  μ (one ⊕ (arg₁ ⊗ arg₂)) (μ RoseF ℕ)
+nil = In (inj₁ tt)
+
+_∷r_ : μ RoseF ℕ → μ (one ⊕ (arg₁ ⊗ arg₂)) (μ RoseF ℕ)
+       → μ (one ⊕ (arg₁ ⊗ arg₂)) (μ RoseF ℕ)
+t ∷r ts = In (inj₂ (fst t , snd ts))
+
+infixr 6 _∷r_
+
+node : ℕ → μ (one ⊕ (arg₁ ⊗ arg₂)) (μ RoseF ℕ) → μ RoseF ℕ
+node n ts = In (fst n , snd ts)
+
+rose : RoseT
+rose = node 0 ((node 1 nil) ∷r
+               (node 2 (node 3 nil ∷r
+                        node 4 nil ∷r nil) ∷r
+               (node 5 nil) ∷r
+               nil))
 mutual 
   fold : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
        → (⟦ F ⟧ A B → B) → μ F A → B
