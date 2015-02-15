@@ -19,6 +19,7 @@ data PolyF : Set where
   arg₂ : PolyF
   _⊕_ : PolyF → PolyF → PolyF
   _⊗_ : PolyF → PolyF → PolyF
+  fix : PolyF → PolyF
 
 data Zero {i} : Set i where
 
@@ -31,42 +32,55 @@ data Fst {i j} (A : Set i) : Set (i ⊔ℓ j) where
 data Snd {i j} (X : Set j) : Set (i ⊔ℓ j) where
   snd : X → Snd {i} {j} X
 
-⟦_⟧ : PolyF → ∀{i j} → (A : Set i) (X : Set j) → Set (i ⊔ℓ j)
-⟦ zer ⟧ A X = Zero
-⟦ one ⟧ A X = One
-⟦ arg₁ ⟧ {i} {j} A X = Fst {i} {j} A
-⟦ arg₂ ⟧ {i} {j} A X = Snd {i} {j} X
-⟦ l ⊕ r ⟧ A X = ⟦ l ⟧ A X ⊎ ⟦ r ⟧ A X
-⟦ l ⊗ r ⟧ A X = ⟦ l ⟧ A X × ⟦ r ⟧ A X
+mutual
 
-data μ (F : PolyF) {i} (A : Set i) : Set i where
-  In : ⟦ F ⟧ A (μ F A) → μ F A
+ ⟦_⟧ : PolyF → ∀{i j} → (A : Set i) (X : Set j) → Set (i ⊔ℓ j)
+ ⟦ zer ⟧ A X = Zero
+ ⟦ one ⟧ A X = One
+ ⟦ arg₁ ⟧ {i} {j} A X = Fst {i} {j} A
+ ⟦ arg₂ ⟧ {i} {j} A X = Snd {i} {j} X
+ ⟦ l ⊕ r ⟧ A X = ⟦ l ⟧ A X ⊎ ⟦ r ⟧ A X
+ ⟦ l ⊗ r ⟧ A X = ⟦ l ⟧ A X × ⟦ r ⟧ A X
+ ⟦ fix F ⟧ {i} {j} A X = Snd {i} {j} (μ F X)
 
-bimap : (F : PolyF) → ∀ {i j k l} {A₁ : Set i} {A₂ : Set j} {B₁ : Set k} {B₂ : Set l}
-        → (A₁ → A₂) → (B₁ → B₂) → ⟦ F ⟧ A₁ B₁ → ⟦ F ⟧ A₂ B₂
-bimap zer f g ()
-bimap one f g tt = tt
-bimap arg₁ f g (fst a) = fst (f a)
-bimap arg₂ f g (snd b) = snd (g b)
-bimap (F₁ ⊕ F₂) f g (inj₁ x) = inj₁ (bimap F₁ f g x)
-bimap (F₁ ⊕ F₂) f g (inj₂ y) = inj₂ (bimap F₂ f g y)
-bimap (F₁ ⊗ F₂) f g (x , y) = bimap F₁ f g x , bimap F₂ f g y
+ data μ (F : PolyF) {i} (A : Set i) : Set i where
+   In : ⟦ F ⟧ A (μ F A) → μ F A
+
 
 mutual 
   fold : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
        → (⟦ F ⟧ A B → B) → μ F A → B
-  fold F f (In xs) = f (mapFold F F f xs)
+  fold F f (In xs) = f (bimapFold F F f xs)
 
-  mapFold : (F G : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
+  -- bimapFold F F f = bimap F id (fold F f) 
+  bimapFold : (F G : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
           → (⟦ F ⟧ A B → B) → ⟦ G ⟧ A (μ F A) → ⟦ G ⟧ A B
-  mapFold F zer f ()
-  mapFold F one f tt = tt
-  mapFold F arg₁ f (fst a) = fst a
-  mapFold F arg₂ f (snd x) = snd (fold F f x)
-  mapFold F (G₁ ⊕ G₂) f (inj₁ x) = inj₁ (mapFold F G₁ f x)
-  mapFold F (G₁ ⊕ G₂) f (inj₂ y) = inj₂ (mapFold F G₂ f y)
-  mapFold F (G₁ ⊗ G₂) f (x , y) = mapFold F G₁ f x , mapFold F G₂ f y
+  bimapFold F zer f ()
+  bimapFold F one f tt = tt
+  bimapFold F arg₁ f (fst a) = fst a
+  bimapFold F arg₂ f (snd x) = snd (fold F f x)
+  bimapFold F (G₁ ⊕ G₂) f (inj₁ x) = inj₁ (bimapFold F G₁ f x)
+  bimapFold F (G₁ ⊕ G₂) f (inj₂ y) = inj₂ (bimapFold F G₂ f y)
+  bimapFold F (G₁ ⊗ G₂) f (x , y) = bimapFold F G₁ f x , bimapFold F G₂ f y
+  bimapFold F (fix G) f (snd (In xs)) = snd {!!}
+    -- (map G (fold F f) xs)
 
+  map : ∀ {i j} {A : Set i} {B : Set j} →
+      ∀ F → (A → B) → μ F A → μ F B
+  map F f = fold F (In ∘ bimap F f id)
+
+  bimap : (F : PolyF) → ∀ {i j k l} {A₁ : Set i} {A₂ : Set j} {B₁ : Set k} {B₂ : Set l}
+        → (A₁ → A₂) → (B₁ → B₂) → ⟦ F ⟧ A₁ B₁ → ⟦ F ⟧ A₂ B₂
+  bimap zer f g ()
+  bimap one f g tt = tt
+  bimap arg₁ f g (fst a) = fst (f a)
+  bimap arg₂ f g (snd b) = snd (g b)
+  bimap (F₁ ⊕ F₂) f g (inj₁ x) = inj₁ (bimap F₁ f g x)
+  bimap (F₁ ⊕ F₂) f g (inj₂ y) = inj₂ (bimap F₂ f g y)
+  bimap (F₁ ⊗ F₂) f g (x , y) = bimap F₁ f g x , bimap F₂ f g y
+  bimap (fix F) f g (snd xs) = snd (map F g xs)
+
+{-
 mutual
 
  fold-universal : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
@@ -89,9 +103,10 @@ mutual
  mapFold-univ F (G₁ ⊕ G₂) h f hom (inj₂ y) = cong inj₂ (mapFold-univ F G₂ h f hom y)
  mapFold-univ F (G₁ ⊗ G₂) h f hom (x , y) 
    rewrite mapFold-univ F G₁ h f hom x | mapFold-univ F G₂ h f hom y = refl
-
+ mapFold-univ F (fix G) h f hom (snd xs) = ?
+-}
 -- relational fold
-
+{-
 bimapR : (F : PolyF) → ∀ {i j k l} {A₁ : Set i} {A₂ : Set j} {B₁ : Set k} {B₂ : Set l}
         → (A₂ ← A₁) → (B₂ ← B₁) → (⟦ F ⟧ A₂ B₂ ← ⟦ F ⟧ A₁ B₁)
 bimapR zer R S () _
@@ -106,4 +121,4 @@ bimapR (F₁ ⊗ F₂) R S (x₁ , y₁) (x₂ , y₂) = bimapR F₁ R S x₁ x�
 
 foldR : (F : PolyF) → {A B : Set} → (B ← ⟦ F ⟧ A B) → (B ← μ F A)
 foldR F R = ∈ ₁∘ fold F (Λ (R ○ bimapR F idR ∈))
-  
+  -}
