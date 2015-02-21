@@ -9,6 +9,8 @@ open import Function using (_∘_; id)
 open import Level renaming (_⊔_ to _⊔ℓ_)
 
 open import Relations
+open import AlgebraicReasoning.ExtensionalEquality using (_≐_)
+open import AlgebraicReasoning.Implications
 
 -- Polynomial bifunctors
 
@@ -79,60 +81,64 @@ mutual
   mapFold F (G₁ ⊕ G₂) f (inj₂ y) = inj₂ (mapFold F G₂ f y)
   mapFold F (G₁ ⊗ G₂) f (x , y) = mapFold F G₁ f x , mapFold F G₂ f y
 
+{-
+  Universal property of fold:
+    h ≐ fold F f  ≡  h ∘ In ≐ f ∘ bimap F id h
+  We split it into two directions: fold-universal-⇐ and fold-universal-⇒.
+-}
+
 mutual
 
- fold-universal-l : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
+ fold-universal-⇐ : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
                 → (h : μ F A → B) → (f : ⟦ F ⟧ A B → B)
-                → (∀ xs → h (In xs) ≡ f (bimap F id h xs))
-                → (∀ xs → h xs ≡ fold F f xs)
- fold-universal-l F h f hom (In xs) 
-   rewrite hom xs = cong f (mapFold-univ-l F F h f hom xs)
+                → (h ∘ In ≐ f ∘ bimap F id h)
+                → (h ≐ fold F f)
+ fold-universal-⇐ F h f hom (In xs) 
+   rewrite hom xs = cong f (mapFold-univ-⇐ F F h f hom xs)
 
- mapFold-univ-l : (F G : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
+ mapFold-univ-⇐ : (F G : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
                → (h : μ F A → B) → (f : ⟦ F ⟧ A B → B) 
-               → (∀ xs → h (In xs) ≡ f (bimap F id h xs))
-               → (Gxs : ⟦ G ⟧ A (μ F A)) 
-               → bimap G id h Gxs ≡ mapFold F G f Gxs
- mapFold-univ-l F zer h f hom ()
- mapFold-univ-l F one h f hom tt = refl
- mapFold-univ-l F arg₁ h f hom (fst a) = refl
- mapFold-univ-l F arg₂ h f hom (snd xs) = cong snd (fold-universal-l F h f hom xs)
- mapFold-univ-l F (G₁ ⊕ G₂) h f hom (inj₁ x) = cong inj₁ (mapFold-univ-l F G₁ h f hom x)
- mapFold-univ-l F (G₁ ⊕ G₂) h f hom (inj₂ y) = cong inj₂ (mapFold-univ-l F G₂ h f hom y)
- mapFold-univ-l F (G₁ ⊗ G₂) h f hom (x , y) 
-   rewrite mapFold-univ-l F G₁ h f hom x | mapFold-univ-l F G₂ h f hom y = refl
+               → (h ∘ In ≐ f ∘ bimap F id h)
+               → bimap G id h ≐ mapFold F G f
+ mapFold-univ-⇐ F zer h f hom ()
+ mapFold-univ-⇐ F one h f hom tt = refl
+ mapFold-univ-⇐ F arg₁ h f hom (fst a) = refl
+ mapFold-univ-⇐ F arg₂ h f hom (snd xs) = cong snd (fold-universal-⇐ F h f hom xs)
+ mapFold-univ-⇐ F (G₁ ⊕ G₂) h f hom (inj₁ x) = cong inj₁ (mapFold-univ-⇐ F G₁ h f hom x)
+ mapFold-univ-⇐ F (G₁ ⊕ G₂) h f hom (inj₂ y) = cong inj₂ (mapFold-univ-⇐ F G₂ h f hom y)
+ mapFold-univ-⇐ F (G₁ ⊗ G₂) h f hom (x , y) 
+   rewrite mapFold-univ-⇐ F G₁ h f hom x | mapFold-univ-⇐ F G₂ h f hom y = refl
 
 mutual
-  fold-universal-r : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j}
+  fold-universal-⇒ : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j}
                     → (h : μ F A → B) → (f : ⟦ F ⟧ A B → B)
-                    → (∀ xs → h xs ≡ fold F f xs)
-                    → (∀ xs → h (In xs) ≡ f (bimap F id h xs))
-  fold-universal-r F h f hom xs
-    rewrite hom (In xs) = cong f (mapFold-univ-r F F h f hom xs)
+                    → (h ≐ fold F f)
+                    → (h ∘ In ≐ f ∘ bimap F id h)
+  fold-universal-⇒ F h f hom xs
+    rewrite hom (In xs) = cong f (mapFold-univ-⇒ F F h f hom xs)
 
-  mapFold-univ-r : (F G : PolyF) → ∀ {i j} {A : Set i} {B : Set j}
+  mapFold-univ-⇒ : (F G : PolyF) → ∀ {i j} {A : Set i} {B : Set j}
                   → (h : μ F A → B) → (f : ⟦ F ⟧ A B → B)
-                  → (∀ xs → h xs ≡ fold F f xs)
-                  → (Gxs : ⟦ G ⟧ A (μ F A))
-                  → mapFold F G f Gxs ≡ bimap G id h Gxs
-  mapFold-univ-r F zer h f hom ()
-  mapFold-univ-r F one h f hom tt = refl
-  mapFold-univ-r F arg₁ h f hom (fst x) = refl
-  mapFold-univ-r F arg₂ h f hom (snd y) = cong snd (sym (hom y))
-  mapFold-univ-r F (G₁ ⊕ G₂) h f hom (inj₁ x) = cong inj₁ (mapFold-univ-r F G₁ h f hom x)
-  mapFold-univ-r F (G₁ ⊕ G₂) h f hom (inj₂ y) = cong inj₂ (mapFold-univ-r F G₂ h f hom y)
-  mapFold-univ-r F (G₁ ⊗ G₂) h f hom (x , y)
-    rewrite mapFold-univ-r F G₁ h f hom x | mapFold-univ-r F G₂ h f hom y = refl
+                  → (h ≐ fold F f)
+                  → mapFold F G f ≐ bimap G id h
+  mapFold-univ-⇒ F zer h f hom ()
+  mapFold-univ-⇒ F one h f hom tt = refl
+  mapFold-univ-⇒ F arg₁ h f hom (fst x) = refl
+  mapFold-univ-⇒ F arg₂ h f hom (snd y) = cong snd (sym (hom y))
+  mapFold-univ-⇒ F (G₁ ⊕ G₂) h f hom (inj₁ x) = cong inj₁ (mapFold-univ-⇒ F G₁ h f hom x)
+  mapFold-univ-⇒ F (G₁ ⊕ G₂) h f hom (inj₂ y) = cong inj₂ (mapFold-univ-⇒ F G₂ h f hom y)
+  mapFold-univ-⇒ F (G₁ ⊗ G₂) h f hom (x , y)
+    rewrite mapFold-univ-⇒ F G₁ h f hom x | mapFold-univ-⇒ F G₂ h f hom y = refl
 
 fold-fusion : (F : PolyF) → ∀ {i j k} {A : Set i} {B : Set j} {C : Set k}
              → (h : B → C) → (f : ⟦ F ⟧ A B → B) → (g : ⟦ F ⟧ A C → C)
-             → (∀ Fb → h (f Fb) ≡ g (bimap F id h Fb))
-             → (∀ xs → h (fold F f xs) ≡ fold F g xs)
-fold-fusion F h f g hom = fold-universal-l F (h ∘ fold F f) g hom'
+             → (h ∘ f ≐ g ∘ bimap F id h)
+             → (h ∘ fold F f ≐ fold F g)
+fold-fusion F h f g hom = fold-universal-⇐ F (h ∘ fold F f) g hom'
   where
     hom' : ∀ xs → h (fold F f (In xs)) ≡ g (bimap F id (h ∘ fold F f) xs)
     hom' xs
-      rewrite fold-universal-r F (fold F f) f (λ _ → refl) xs | bimap-comp F id h id (fold F f) xs = hom (bimap F id (fold F f) xs)
+      rewrite fold-universal-⇒ F (fold F f) f (λ _ → refl) xs | bimap-comp F id h id (fold F f) xs = hom (bimap F id (fold F f) xs)
 
 -- relational fold
 
@@ -150,4 +156,3 @@ bimapR (F₁ ⊗ F₂) R S (x₁ , y₁) (x₂ , y₂) = bimapR F₁ R S x₁ x�
 
 foldR : (F : PolyF) → {A B : Set} → (B ← ⟦ F ⟧ A B) → (B ← μ F A)
 foldR F R = ∈ ₁∘ fold F (Λ (R ○ bimapR F idR ∈))
-  
