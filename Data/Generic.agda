@@ -9,7 +9,9 @@ open import Function using (_∘_; id)
 open import Level renaming (_⊔_ to _⊔ℓ_)
 
 open import Relations
-open import AlgebraicReasoning.ExtensionalEquality using (_≐_)
+open import AlgebraicReasoning.ExtensionalEquality 
+            using (_≐_; ≐-refl; ≐-sym; ≐-trans; ≐-trans'; 
+                   pre-∘-cong; post-∘-cong)
 open import AlgebraicReasoning.Implications
 
 -- Polynomial bifunctors
@@ -130,15 +132,55 @@ mutual
   mapFold-univ-⇒ F (G₁ ⊗ G₂) h f hom (x , y)
     rewrite mapFold-univ-⇒ F G₁ h f hom x | mapFold-univ-⇒ F G₂ h f hom y = refl
 
-fold-fusion : (F : PolyF) → ∀ {i j k} {A : Set i} {B : Set j} {C : Set k}
+fold-computation : (F : PolyF) → ∀ {i j} {A : Set i} {B : Set j} 
+                 → (f : ⟦ F ⟧ A B → B)
+                 → (fold F f ∘ In ≐ f ∘ bimap F id (fold F f))
+fold-computation F f = fold-universal-⇒ F (fold F f) f ≐-refl
+
+fold-fusion : (F : PolyF) → ∀ {i j} {A : Set i} {B C : Set j}
              → (h : B → C) → (f : ⟦ F ⟧ A B → B) → (g : ⟦ F ⟧ A C → C)
              → (h ∘ f ≐ g ∘ bimap F id h)
              → (h ∘ fold F f ≐ fold F g)
-fold-fusion F h f g hom = fold-universal-⇐ F (h ∘ fold F f) g hom'
+fold-fusion F h f g hom = 
+   (⇐-begin 
+      h ∘ fold F f ≐ fold F g
+    ⇐⟨ fold-universal-⇐ F (h ∘ fold F f) g ⟩ 
+      h ∘ fold F f ∘ In ≐ g ∘ bimap F id (h ∘ fold F f)
+    ⇐⟨ ≐-trans (pre-∘-cong h (fold-computation F f)) ⟩ 
+      h ∘ f ∘ bimap F id (fold F f) ≐ g ∘ bimap F id (h ∘ fold F f) 
+    ⇐⟨ ≐-trans' (pre-∘-cong g (≐-sym (bimap-comp F id h id (fold F f)))) ⟩ 
+      h ∘ f ∘ bimap F id (fold F f) ≐ g ∘ bimap F id h ∘ bimap F id (fold F f)
+    ⇐⟨ post-∘-cong (bimap F id (fold F f)) ⟩ 
+      h ∘ f ≐ g ∘ bimap F id h ⇐∎) hom
+
+{-
+  In the fold-fusion theorem proved above B and C must have the
+  same level due to the restriction of AlgebraicReasoning.Implications.
+
+  AlgebraicReasoning modules currently demands that all the 
+  related components have the same type (or the same level, if they are Sets).
+
+  If {A : Set i} {B : Set j} {C : Set k}, 
+   h ∘ fold F f ≐ fold F g  :  Set (k ⊔ℓ i)  (and all the equations except the last one)
+       since both sides have type μ F A → C, while
+   h ∘ f ≐ g ∘ bimap F id h  :  Set (k ⊔ℓ (j ⊔ℓ i))
+       since both side have type  ⟦ F ⟧ A B → C
+  
+  We temporarily sidestep the problem by letting {B C : Set j}.
+-}
+
+{- A direct, and more general proof. -}
+
+fold-fusion' : (F : PolyF) → ∀ {i j k} {A : Set i} {B : Set j} {C : Set k}
+             → (h : B → C) → (f : ⟦ F ⟧ A B → B) → (g : ⟦ F ⟧ A C → C)
+             → (h ∘ f ≐ g ∘ bimap F id h)
+             → (h ∘ fold F f ≐ fold F g)
+
+fold-fusion' F h f g hom = fold-universal-⇐ F (h ∘ fold F f) g hom'
   where
     hom' : ∀ xs → h (fold F f (In xs)) ≡ g (bimap F id (h ∘ fold F f) xs)
-    hom' xs
-      rewrite fold-universal-⇒ F (fold F f) f (λ _ → refl) xs | bimap-comp F id h id (fold F f) xs = hom (bimap F id (fold F f) xs)
+    hom' xs rewrite fold-universal-⇒ F (fold F f) f (λ _ → refl) xs | 
+                    bimap-comp F id h id (fold F f) xs = hom (bimap F id (fold F f) xs)
 
 -- relational fold
 
