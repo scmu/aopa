@@ -11,20 +11,20 @@ open import AlgebraicReasoning.Implications
 
 -- ˘-universal : X ⊑ R ˘  ⇔  X ˘ ⊑ R
 
-˘-universal-⇒  : ∀ {i j} {A : Set i} {B : Set j} {X : A ← B} {R : B ← A} → 
+˘-universal-⇒  : ∀ {i j k} {A : Set i} {B : Set j} {X : A ← B ⊣ k} {R : B ← A} → 
                  X ⊑ R ˘ → X ˘ ⊑ R
 ˘-universal-⇒ X⊑R˘ a b aXb = X⊑R˘ b a aXb
 
-˘-universal-⇐ : ∀ {i j} {A : Set i} {B : Set j} {X : A ← B} {R : B ← A} → 
+˘-universal-⇐ : ∀ {i j k} {A : Set i} {B : Set j} {X : A ← B ⊣ k} {R : B ← A} → 
                   X ˘ ⊑ R → X ⊑ R ˘
 ˘-universal-⇐ X˘⊑R b a bXa = X˘⊑R a b bXa 
 
 -- id ≑ id˘
 
-id⊑id˘ : {A : Set} → idR {A} ⊑ (idR {A})˘
+id⊑id˘ : {A : Set} → idR {A = A} ⊑ (idR)˘
 id⊑id˘ a a' = sym 
 
-id˘⊑id : {A : Set} → (idR {A})˘ ⊑ idR {A}
+id˘⊑id : {A : Set} → (idR {A = A})˘ ⊑ idR
 id˘⊑id a a' = sym 
 
 -- C ≑ C˘ if C ⊑ id
@@ -39,19 +39,17 @@ C˘⊑C C⊑id a .a a'Ca | refl = a'Ca
 
 -- ˘-idempotent : R˘˘ ≑ R
 
-˘-idempotent-⊑ : ∀ {i j} {A : Set i} {B : Set j} → {R : A ← B} → (R ˘) ˘ ⊑ R
+˘-idempotent-⊑ : ∀ {i j k} {A : Set i} {B : Set j} → {R : A ← B ⊣ k} → (R ˘) ˘ ⊑ R
 ˘-idempotent-⊑ = ˘-universal-⇒ ⊑-refl
 
-˘-idempotent-⊒ : ∀ {i j} {A : Set i} {B : Set j} → {R : A ← B} → R ⊑ (R ˘) ˘
+˘-idempotent-⊒ : ∀ {i j k} {A : Set i} {B : Set j} → {R : A ← B ⊣ k} → R ⊑ (R ˘) ˘
 ˘-idempotent-⊒ = ˘-universal-⇐ ⊑-refl
 
 -- monotonicity: R ˘ ⊑ S ˘ ⇔ R ⊑ S
 
- -- Why can they not be level polymorphic?
-
-˘-monotonic-⇒ : {A B : Set} {R S : B ← A} →
+˘-monotonic-⇒ : ∀ {i j k} {A : Set i} {B : Set j} {R S : B ← A ⊣ k} →
                  R ˘ ⊑ S ˘ → R ⊑ S 
-˘-monotonic-⇒ {_}{_}{R}{S} =
+˘-monotonic-⇒ {R = R}{S} =
     ⇐-begin
          R ⊑ S
     ⇐⟨ ⊑-trans ˘-idempotent-⊒ ⟩
@@ -60,9 +58,9 @@ C˘⊑C C⊑id a .a a'Ca | refl = a'Ca
          R ˘ ⊑ S ˘ 
     ⇐∎
 
-˘-monotonic-⇐ : {A B : Set} {R S : B ← A} →
+˘-monotonic-⇐ : ∀ {i j k} {A : Set i} {B : Set j} {R S : B ← A ⊣ k} →
                  R ⊑ S → R ˘ ⊑ S ˘ 
-˘-monotonic-⇐ {_}{_}{R}{S} =
+˘-monotonic-⇐ {R = R}{S} =
     ⇐-begin
        R ˘ ⊑ S ˘ 
     ⇐⟨ ˘-universal-⇐ ⟩
@@ -73,31 +71,31 @@ C˘⊑C C⊑id a .a a'Ca | refl = a'Ca
      
 -- distributivity rules
 
-˘-○-distr-⊒ : ∀ {i j} {A : Set i} {B : Set} {C : Set j} → (R : A ← B) → (S : B ← C) →
+˘-○-distr-⊒ : ∀ {i j k l m} {A : Set i} {B : Set j} {C : Set k} → (R : A ← B ⊣ l) → (S : B ← C ⊣ m) →
         (R ○ S)˘ ⊒ S ˘ ○ R ˘
 ˘-○-distr-⊒ R S a c  (b , bRa , cSb) = (b , cSb , bRa) 
 
-˘-○-distr-⊑ : ∀ {i j} {A : Set i} {B : Set} {C : Set j} → (R : A ← B) → (S : B ← C) →
+˘-○-distr-⊑ : ∀ {i j k l m} {A : Set i} {B : Set j} {C : Set k} → (R : A ← B ⊣ l) → (S : B ← C ⊣ m) →
         (R ○ S)˘ ⊑ S ˘ ○ R ˘
 ˘-○-distr-⊑ R S a c (b , cSb , bRa) = (b , bRa , cSb)
 
-˘-○-distr3-⊒ : ∀ {i j} {A : Set i} {B C : Set} {D : Set j} → 
-     (R : A ← B) → (S : B ← C) → (T : C ← D) →
+˘-○-distr3-⊒ : ∀ {i j k l m n o} {A : Set i} {B : Set j} {C : Set k} {D : Set l} → 
+     (R : A ← B ⊣ m) → (S : B ← C ⊣ n) → (T : C ← D ⊣ o) →
         (R ○ S ○ T)˘ ⊒ T ˘ ○ S ˘ ○ R ˘
 ˘-○-distr3-⊒ R S T a d (c , (b , bRa , bSc) , cTd) = 
      (b , (c , cTd , bSc) , bRa)  
 
-˘-○-distr3-⊑ : ∀ {i j} {A : Set i} {B C : Set} {D : Set j} → 
-     {R : A ← B} → {S : B ← C} → {T : C ← D} →
+˘-○-distr3-⊑ : ∀ {i j k l m n o} {A : Set i} {B : Set j} {C : Set k} {D : Set l} → 
+     {R : A ← B ⊣ m} → {S : B ← C ⊣ n} → {T : C ← D ⊣ o} →
         (R ○ S ○ T)˘ ⊑ T ˘ ○ S ˘ ○ R ˘ 
 ˘-○-distr3-⊑ {R} {S} {T} a d (b , (c , cTd , bSc) , bRa) = 
      (c , (b , bRa , bSc) , cTd)
 
-˘-⨉-distr-⊑ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} {D : Set l} →
-  {R : B ← A} → {S : D ← C} → (R ⨉ S)˘ ⊑ (R ˘ ⨉ S ˘)
+˘-⨉-distr-⊑ : ∀ {i j k l m n} {A : Set i} {B : Set j} {C : Set k} {D : Set l} →
+  {R : B ← A ⊣ m} → {S : D ← C ⊣ n} → (R ⨉ S)˘ ⊑ (R ˘ ⨉ S ˘)
 ˘-⨉-distr-⊑ (b , d) (a , c) (bRa , dSc) = bRa , dSc
 
-˘-⨉-distr-⊒ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} {D : Set l} →
-  {R : B ← A} → {S : D ← C} → (R ⨉ S)˘ ⊒ (R ˘ ⨉ S ˘)
+˘-⨉-distr-⊒ : ∀ {i j k l m n} {A : Set i} {B : Set j} {C : Set k} {D : Set l} →
+  {R : B ← A ⊣ m} → {S : D ← C ⊣ n} → (R ⨉ S)˘ ⊒ (R ˘ ⨉ S ˘)
 ˘-⨉-distr-⊒ (b , d) (a , c) (bRa , dSc) = bRa , dSc
 

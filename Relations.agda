@@ -246,6 +246,6 @@ id-elim-l b a bRa = (b , bRa , refl)
 
 infixr 2 _⨉_
 
-_⨉_ : ∀ {i j k l m} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
-     → (B ← A ⊣ m) → (D ← C ⊣ m) → ((B × D) ← (A × C)) 
+_⨉_ : ∀ {i j k l m n} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
+     → (B ← A ⊣ m) → (D ← C ⊣ n) → ((B × D) ← (A × C)) 
 (R ⨉ S) (b , d) (a , c) = (R b a × S d c)
