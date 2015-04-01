@@ -124,22 +124,22 @@ thin : {A : Set} → (A ← A) → (ℙ A ← ℙ A)
 thin Q = (∈ ﹨ ∈) ⊓ ((∋ ○ Q) / ∋)
 
 -- thin-universal-⇐ :
---    ₁⊑ thin Q ₁∘ Λ S ⇔ (X ₁⊑ ∈ ₁﹨ S  ₁×₁  X ₁○ (S ˘) ₁⊑ ∋ ₁○ Q)
+--    ⊑ thin Q ₁∘ Λ S ⇔ (X ⊑ ∈ ﹨ S  ×  X ○ (S ˘) ⊑ ∋ ○ Q)
 
 thin-universal-⇐ : {A B : Set} →
    {Q : A ← A} {S : A ← B} → (X : ℙ A ← B) →
-     X ⊑ thin Q ₁∘₁ Λ S → (X ⊑ ∈ ﹨ S  ×  X ○ (S ˘) ⊑ ∋ ○ Q)
+     X ⊑ thin Q ₁∘ Λ S → (X ⊑ ∈ ﹨ S  ×  X ○ (S ˘) ⊑ ∋ ○ Q)
 thin-universal-⇐ {Q = Q}{S} X = 
    ⇒-begin
-     X ⊑ thin Q ₁∘₁ Λ S
+     X ⊑ thin Q ₁∘ Λ S
    ⇒⟨  ⇒-refl  ⟩
-     X ⊑ ((∈ ﹨ ∈) ⊓ ((∋ ○ Q) / ∋)) ₁∘₁ Λ S
-   ⇒⟨  ⊒-trans (₁⊓₁-Λ-distr (∈ ﹨ ∈) ((∋ ○ Q) / ∋))   ⟩
-     X ⊑ ((∈ ﹨ ∈) ₁∘₁ Λ S) ⊓ (((∋ ○ Q) / ∋) ₁∘₁ Λ S)
-   ⇒⟨  ⊑-⊓ X ((∈ ﹨ ∈) ₁∘₁ Λ S) (((∋ ○ Q) / ∋) ₁∘₁ Λ S)   ⟩
-     (X ⊑ (∈ ﹨ ∈) ₁∘₁ Λ S  ×  X ⊑ ((∋ ○ Q) / ∋) ₁∘₁ Λ S)
+     X ⊑ ((∈ ﹨ ∈) ⊓ ((∋ ○ Q) / ∋)) ₁∘ Λ S
+   ⇒⟨  ⊒-trans (⊓-Λ-distr-⊑ (∈ ﹨ ∈) ((∋ ○ Q) / ∋))   ⟩
+     X ⊑ ((∈ ﹨ ∈) ₁∘ Λ S) ⊓ (((∋ ○ Q) / ∋) ₁∘ Λ S)
+   ⇒⟨  ⊑-⊓ X ((∈ ﹨ ∈) ₁∘ Λ S) (((∋ ○ Q) / ∋) ₁∘ Λ S)   ⟩
+     (X ⊑ (∈ ﹨ ∈) ₁∘ Λ S  ×  X ⊑ ((∋ ○ Q) / ∋) ₁∘ Λ S)
    ⇒⟨  ⇒-refl  ⟩
-     (X ⊑ ∈ ﹨ S  ×  X ⊑ ((∋ ○ Q) / ∋) ₁∘₁ Λ S)
+     (X ⊑ ∈ ﹨ S  ×  X ⊑ ((∋ ○ Q) / ∋) ₁∘ Λ S)
    ⇒⟨  ⇒-refl   ⟩
      (X ⊑ ∈ ﹨ S  ×  X ⊑ (∋ ○ Q) / (S ˘))
    ⇒⟨  map-× (λ x → x) /-universal-⇐  ⟩

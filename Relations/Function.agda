@@ -13,8 +13,9 @@ open import AlgebraicReasoning.Implications
 
 -- Functions are simple and entire
 
-fun-simple : {A B : Set}{f : A → B} → fun f ○ (fun f)˘ ⊑ idR
-fun-simple {A}{B}{f} b' b (a , fa≡b , fa≡b') = 
+fun-simple : ∀ {i} {A B : Set i} {f : A → B} 
+             → fun f ○ (fun f)˘ ⊑ idR
+fun-simple {f = f} b' b (a , fa≡b , fa≡b') = 
    ≡-begin
        b 
    ≡⟨ sym fa≡b ⟩
@@ -23,15 +24,16 @@ fun-simple {A}{B}{f} b' b (a , fa≡b , fa≡b') =
        b'
    ≡∎
 
-fun-entire : {A B : Set} → {f : A → B} → idR ⊑ (fun f) ˘ ○ fun f
-fun-entire {A}{B}{f} a' a a≡a' = 
+fun-entire : ∀ {i} {A B : Set i} {f : A → B} 
+             → idR ⊑ (fun f) ˘ ○ fun f
+fun-entire {f = f} a' a a≡a' = 
     (f a , refl , cong f (sym a≡a'))
 
 -- Shunting rules
 
-fR⊑S⇒R⊑f˘S : {A B C : Set} {f : B → C} →
-     {R : B ← A} → {S : C ← A} →
-        fun f ○ R ⊑ S →  R ⊑ (fun f) ˘ ○ S
+fR⊑S⇒R⊑f˘S : ∀ {i j} {A : Set i} {B C : Set j} 
+             → {f : B → C} {R : B ← A} {S : C ← A}
+             → fun f ○ R ⊑ S →  R ⊑ (fun f) ˘ ○ S
 fR⊑S⇒R⊑f˘S {f = f} {R} {S} =
    ⇒-begin
        fun f ○ R ⊑ S
@@ -45,7 +47,7 @@ fR⊑S⇒R⊑f˘S {f = f} {R} {S} =
        R ⊑ (fun f) ˘ ○ S
    ⇒∎
 
-R⊑f˘S⇒fR⊑S : {A B C : Set} {f : B → C} →
+R⊑f˘S⇒fR⊑S : ∀ {i j} {A : Set i} {B C : Set j} {f : B → C} →
      {R : B ← A} → {S : C ← A} →
          R ⊑ (fun f) ˘ ○ S → fun f ○ R ⊑ S
 R⊑f˘S⇒fR⊑S {f = f} {R} {S} =
@@ -61,9 +63,9 @@ R⊑f˘S⇒fR⊑S {f = f} {R} {S} =
        fun f ○ R ⊑ S
    ⇒∎   
 
-R⊑fS⇒f˘R⊑S : {A B C : Set} {f : A → B} →
-     {R : C ← A} → {S : C ← B} →
-         R ⊑ S ○ fun f → R ○ (fun f)˘ ⊑ S
+R⊑fS⇒f˘R⊑S : ∀ {i j} {A B : Set i} {C : Set j} 
+             → {f : A → B} {R : C ← A} {S : C ← B}
+             → R ⊑ S ○ fun f → R ○ (fun f)˘ ⊑ S
 R⊑fS⇒f˘R⊑S {f = f} {R} {S} = 
    ⇒-begin
        R ⊑ S ○ fun f
@@ -77,8 +79,9 @@ R⊑fS⇒f˘R⊑S {f = f} {R} {S} =
        R ○ (fun f)˘ ⊑ S 
    ⇒∎
 
-R○f˘⊑S⇒R⊑S○f : {A B C : Set}{f : C → B}{R : A ← C}{S : A ← B} →
-         R ○ (fun f) ˘ ⊑ S → R ⊑ S ○ fun f
+R○f˘⊑S⇒R⊑S○f : ∀ {i j} {A : Set i} {B C : Set j}
+                → {f : C → B}{R : A ← C}{S : A ← B} 
+                → R ○ (fun f) ˘ ⊑ S → R ⊑ S ○ fun f
 R○f˘⊑S⇒R⊑S○f {f = f} {R} {S} =
    ⇒-begin
        R ○ (fun f) ˘ ⊑ S
@@ -94,13 +97,15 @@ R○f˘⊑S⇒R⊑S○f {f = f} {R} {S} =
 
 -- Functions and products
 
-fun⊑⨉ : {A B C D : Set} {f : A → B} {g : C → D} →
-       fun (map-× f g) ⊑ (fun f ⨉ fun g) 
+fun⊑⨉ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
+        → {f : A → B} {g : C → D}
+        → fun (map-× f g) ⊑ (fun f ⨉ fun g) 
 fun⊑⨉ (a , c) (b , d) f⨉gac≡bd = 
    (cong proj₁ f⨉gac≡bd , cong proj₂ f⨉gac≡bd)
 
-⨉⊑fun : {A B C D : Set} {f : A → B} {g : C → D} →
-          (fun f ⨉ fun g) ⊑ fun (map-× f g)
+⨉⊑fun : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
+        → {f : A → B} {g : C → D}
+        → (fun f ⨉ fun g) ⊑ fun (map-× f g)
 ⨉⊑fun {f = f}{g = g} (b , d) (a , c) (fa≡b , gc≡d) = 
    ≡-begin
      (f a , g c)
@@ -110,12 +115,14 @@ fun⊑⨉ (a , c) (b , d) f⨉gac≡bd =
      (b , d) 
    ≡∎
 
-fun○-⊑ : {A B C : Set} {g : B → C} {f : A → B} →
-    fun g ○ fun f ⊑ fun (g ∘ f)
+fun○-⊑ : ∀ {i j} {A : Set i} {B C : Set j}
+         → {g : B → C} {f : A → B}
+         → fun g ○ fun f ⊑ fun (g ∘ f)
 fun○-⊑ {g = g}{f = f} c a (b , fa≡b , gb≡c) = 
    subst (λ x → g (f a) ≡ x) gb≡c
      (subst (λ x → g (f a) ≡ g x) fa≡b refl)
 
-fun○-⊒ : {A B C : Set} {g : B → C} {f : A → B} →
-    fun g ○ fun f ⊒ fun (g ∘ f)
+fun○-⊒ : ∀ {i j} {A : Set i} {B C : Set j}
+         → {g : B → C} {f : A → B}
+         → fun g ○ fun f ⊒ fun (g ∘ f)
 fun○-⊒ {f = f} c a gfa≡c = (f a , refl , gfa≡c)

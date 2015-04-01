@@ -14,51 +14,51 @@ open import AlgebraicReasoning.Sets
      using (⊆-begin_; _⊆⟨_⟩_; _⊆∎;
             ⊇-begin_; _⊇⟨_⟩_; _⊇∎)
 
-Λ∈-galois-1 : {A B : Set} {R : A → ℙ B} {S : B ← A} →
-              ∈ ₁∘ R ⊑ S → R ⊑ Λ S
+Λ∈-galois-1 : ∀ {i j} {A : Set i} {B : Set j} 
+              → {R : A → ℙ B} {S : B ← A}
+              → ∈ ₁∘ R ⊑ S → R ⊑ Λ S
 Λ∈-galois-1 R⊑S a b bRa = R⊑S b a bRa 
 
-Λ∈-galois-2 : {A B : Set} {R : A → ℙ B} {S : B ← A} →
-               R ⊑ Λ S → ∈ ₁∘ R ⊑ S
+Λ∈-galois-2 : ∀ {i j} {A : Set i} {B : Set j} 
+              → {R : A → ℙ B} {S : B ← A}
+              → R ⊑ Λ S → ∈ ₁∘ R ⊑ S
 Λ∈-galois-2 R⊑S a b bRa = R⊑S b a bRa 
 
-Λ∈-cancelation : {A B : Set} → (r : A → ℙ B) → 
-                 Λ(∈ ₁∘ r) ⊑ r
+Λ∈-cancelation : ∀ {i j} {A : Set i} {B : Set j} 
+                 → (r : A → ℙ B)
+                 → Λ(∈ ₁∘ r) ⊑ r
 Λ∈-cancelation _ _ _ aRb = aRb
 
-∈Λ-cancelation : {A B : Set} → (R : B ← A) → (∈ ₁∘ (Λ R) ⊑ R)
+∈Λ-cancelation : ∀ {i j} {A : Set i} {B : Set j}
+                 → (R : B ← A) → (∈ ₁∘ (Λ R) ⊑ R)
 ∈Λ-cancelation _ _ _ aRb = aRb
 
-Λ-monotonic : ∀ {i} {A : Set i} {B : Set} {R S : B ← A} →
-    (R ⊑ S) →  (Λ R ⊑ Λ S)
+Λ-monotonic : ∀ {i j} {A : Set i} {B : Set j} {R S : B ← A} 
+              → (R ⊑ S) → (Λ R ⊑ Λ S)
 Λ-monotonic R⊑S a b bRa = R⊑S b a bRa  
-{-
-Λ-monotonic : {A : Set1} {B : Set} {R S : B ← A} →
-    (R ⊑ S) →  (Λ R ⊑ Λ S)
-Λ-monotonic R⊑S a b bRa = R⊑S b a bRa  -}
 
-ℰΛ-absorption-⊇ : {A : Set1} {B C : Set} → 
-   (R : C ← B) → (S : B ← A) →
+ℰΛ-absorption-⊇ : ∀ {i j} {A : Set i} {B C : Set j} 
+                  → (R : C ← B ⊣ j) (S : B ← A) →
      (a : A) → Λ(R ○ S) a ⊆ ℰ R (Λ S a)
 ℰΛ-absorption-⊇ _ _ _ _ c∈ΛR○Sa = c∈ΛR○Sa
 
-ℰΛ-absorption-⊆ : {A : Set1} {B C : Set} → 
-   (R : C ← B) → (S : B ← A) →
-      (a : A) → ℰ R (Λ S a) ⊆ Λ(R ○ S) a
+ℰΛ-absorption-⊆ : ∀ {i j} {A : Set i} {B C : Set j} 
+                  → (R : C ← B ⊣ j) (S : B ← A) 
+                  → (a : A) → ℰ R (Λ S a) ⊆ Λ(R ○ S) a
 ℰΛ-absorption-⊆ _ _ _ _ c∈ΛR○Sa = c∈ΛR○Sa
 
-ℰ-monotonic : {A B : Set} {R S : B ← A} →
+ℰ-monotonic : ∀ {i} {A B : Set i} {R S : B ← A ⊣ i} →
     (R ⊑ S) →  (ℰ R ⊑ ℰ S)
-ℰ-monotonic {A}{B}{R}{S} R⊑S = Λ-monotonic R∈⊑S∈
+ℰ-monotonic {R = R}{S} R⊑S = Λ-monotonic R∈⊑S∈
   where R∈⊑S∈ : R ○ ∈ ⊑ S ○ ∈
         R∈⊑S∈ = ○-monotonic-l R⊑S
 
-ℰ-monotonic' : {A B : Set} {R : B ← A} {s t : ℙ A} →
+ℰ-monotonic' : ∀ {i} {A B : Set i} {R : B ← A ⊣ i} {s t : ℙ A} →
     (s ⊆ t) →  (ℰ R s ⊆ ℰ R t)
 ℰ-monotonic' s⊆t b (a , a∈s , bRa) = (a , s⊆t a a∈s , bRa) 
 
-ℰ-functor-⊆ : {A B C : Set} → {R : B ← A} →
-      {S : C ← B} → ∀ {a} →
+ℰ-functor-⊆ : ∀ {i} {A B C : Set i} → {R : B ← A ⊣ i} →
+      {S : C ← B} → ∀ {a : ℙ A} →
          ℰ S (ℰ R a) ⊆ ℰ (S ○ R) a 
 ℰ-functor-⊆ {R = R} {S} {a} =
    ⊆-begin
@@ -73,7 +73,7 @@ open import AlgebraicReasoning.Sets
        ℰ (S ○ R) a
    ⊆∎
 
-ℰ-functor-⊇ : {A B C : Set} → {R : B ← A} →
+ℰ-functor-⊇ : ∀ {i} {A B C : Set i} → {R : B ← A ⊣ i} →
       {S : C ← B} → ∀ {a} →
          ℰ S (ℰ R a) ⊇ ℰ (S ○ R) a 
 ℰ-functor-⊇ {R = R} {S} {a} =

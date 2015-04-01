@@ -14,6 +14,6 @@ import AlgebraicReasoning.PolyPreorderReasoning as PPR
 
   -- shall we make it more level-polymorphic?
 
-module ≡-reasoning = PPR.UnaryCarrier {zero} {zero} (λ A → A) _≡_ ≡-refl ≡-trans
+module ≡-reasoning {i} = PPR.UnaryCarrier {i} {i} (λ A → A) _≡_ ≡-refl ≡-trans
    renaming (begin_ to ≡-begin_ ; _∼⟨_⟩_ to _≡⟨_⟩_ ; _∎ to _≡∎)
 open ≡-reasoning public 
