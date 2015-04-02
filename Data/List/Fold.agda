@@ -48,7 +48,7 @@ cons = fun (uncurry _∷_)
 nil : {A : Set} → ℙ (List A)
 nil = singleton []
 
-cons-injective : {A : Set} → cons ˘ ○ cons ⊑ idR {A × List A}
+cons-injective : {A : Set} → cons ˘ ○ cons ⊑ idR {A = A × List A}
 cons-injective (x , xs) (_ , _) (_ , r1 , r2) with r1 | r2
 cons-injective (x , xs) (.x , .xs) (._ , _ , _)  | refl | refl = refl
 
