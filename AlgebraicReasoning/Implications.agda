@@ -48,19 +48,3 @@ A ⇔ B = A ⇒ B × A ⇐ B
 module ⇔-reasoning {i : Level} = MPR.Mono {suc i} {i} _⇔_ ⇔-refl ⇔-trans
    renaming (begin_ to ⇔-begin_ ; _∼⟨_⟩_ to _⇔⟨_⟩_ ; _∎ to _⇔∎)
 open ⇔-reasoning public hiding (byDef) 
-
-{-
-_⇒₁_ : Set1 → Set1 → Set1
-A ⇒₁ B = A → B
-
-⇒₁-refl : {A : Set1} → A ⇒₁ A
-⇒₁-refl x = x
-
-⇒₁-trans : {A B C : Set1} → (A ⇒₁ B) → (B ⇒₁ C) → (A ⇒₁ C)
-⇒₁-trans f g x = g (f x)
-
-module ⇒₁-reasoning = MPR.Sets1 _⇒₁_ ⇒₁-refl ⇒₁-trans
-   renaming (begin_ to ⇒₁-begin_ ; _∼⟨_⟩_ to _⇒₁⟨_⟩_ ; _∎ to _⇒₁∎)
-open ⇒₁-reasoning public
-
--}
