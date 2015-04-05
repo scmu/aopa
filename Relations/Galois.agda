@@ -46,12 +46,13 @@ galois-easy : ∀ {i} {A B : Set i}
               → S ○ (fun f)˘ ⊑ (fun f)˘ ○ R
               → fun g ⊑ (fun f)˘ ○ R
               → S ○ fun g ⊑ (fun f)˘ ○ R
-galois-easy f g R S Sf˘⊑f˘R g⊑f˘R = 
-  (⇒-begin 
+galois-easy f g R S Sf˘⊑f˘R = 
+   ⇒-begin 
      fun g ⊑ fun f ˘ ○ R 
    ⇒⟨ ○-monotonic-r ⟩ 
      S ○ fun g ⊑ S ○ fun f ˘ ○ R 
    ⇒⟨ ⊒-trans (⇦-mono-l (S ● (fun f ˘) ‥) (fun f ˘ ● R ‥) Sf˘⊑f˘R) ⟩ 
      S ○ fun g ⊑ fun f ˘ ○ R ○ R 
    ⇒⟨ {!!} ⟩ 
-     S ○ fun g ⊑ fun f ˘ ○ R ⇒∎) g⊑f˘R
+     S ○ fun g ⊑ fun f ˘ ○ R 
+   ⇒∎
