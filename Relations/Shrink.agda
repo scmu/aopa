@@ -7,6 +7,7 @@ open import Data.Product renaming (map to ×-map)
 open import Relations
 open import Relations.Factor
 open import Relations.Product
+open import Relations.Galois
 open import AlgebraicReasoning.Implications
 open import Relation.Binary.PropositionalEquality
 
@@ -62,3 +63,10 @@ R ↾ S = R ⊓ (S / R ˘)
               → X ⊑ R ↾ S ⇔
                 ((X ⊑ R) × (X ○ R ˘ ⊑ S))
 ↾-universal {S = S} = ↾-universal-⇒ , ↾-universal-⇐
+
+galois-shrink : ∀ {i} {A B : Set i}
+         → (f : A → B) (g : B → A)
+         → (R : B ← B ⊣ i) (S : A ← A  ⊣ i)
+         → galois f g R S
+         → fun g ⊑ ((fun f)˘ ○ R) ↾ (S ˘)
+galois-shrink = {!!}
