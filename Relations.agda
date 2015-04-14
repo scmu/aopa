@@ -89,6 +89,27 @@ infix 4 _≑_
 _≑_ : ∀ {i j k} {A : Set i} {B : Set j} → (B ← A ⊣ k) → (B ← A) → Set (k ⊔ℓ (j ⊔ℓ i))
 R ≑ S = (R ⊑ S × S ⊑ R)
 
+≑-refl : ∀ {i j k} {A : Set i} {B : Set j} {R : B ← A ⊣ k} → R ≑ R
+≑-refl = ⊑-refl , ⊑-refl
+
+≑-sym :  ∀ {i j k} {A : Set i} {B : Set j} {R S : B ← A ⊣ k}
+         → R ≑ S → S ≑ R
+≑-sym (R⊑S , S⊑R) =  S⊑R , R⊑S
+
+≑-trans :  ∀ {i j k} {A : Set i} {B : Set j} {R S T : B ← A ⊣ k} 
+           → R ≑ S → S ≑ T → R ≑ T
+≑-trans (R⊑S , S⊑R) (S⊑T , T⊑S) = ⊑-trans R⊑S S⊑T , ⊑-trans T⊑S S⊑R
+
+⊑-antisym : ∀ {i j k} {A : Set i} {B : Set j} 
+            → {R S : B ← A ⊣ k}
+            → R ⊑ S → S ⊑ R → R ≑ S
+⊑-antisym R⊑S S⊑R = R⊑S , S⊑R
+
+⊒-antisym : ∀ {i j k} {A : Set i} {B : Set j} 
+            → {R S : B ← A ⊣ k}
+            → R ⊒ S → S ⊒ R → R ≑ S
+⊒-antisym R⊒S S⊒R = S⊒R , R⊒S
+
 -- converse and composition
 
 _˘ : ∀ {i j k} {A : Set i} {B : Set j} → (B ← A ⊣ k) → A ← B
