@@ -8,6 +8,7 @@ open import Relations
 open import Relations.Factor
 open import Relations.Product
 open import Relations.Galois
+open import AlgebraicReasoning.Equivalence
 open import AlgebraicReasoning.Implications
 open import Relation.Binary.PropositionalEquality
 
@@ -66,7 +67,12 @@ R ↾ S = R ⊓ (S / R ˘)
 
 galois-shrink : ∀ {i} {A B : Set i}
          → (f : A → B) (g : B → A)
-         → (R : B ← B ⊣ i) (S : A ← A  ⊣ i)
+         → (R : B ← B ⊣ i) (S : A ← A ⊣ i)
          → galois f g R S
          → fun g ⊑ ((fun f)˘ ○ R) ↾ (S ˘)
-galois-shrink = {!!}
+galois-shrink f g R S gal = ↾-universal-⇐ (g⊑f˘R , gR˘f⊑S˘)
+  where g⊑f˘R : fun g ⊑ (fun f ˘ ○ R)
+        g⊑f˘R = galois-easy-⇒ {S = S} gal
+
+        gR˘f⊑S˘ : fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘ 
+        gR˘f⊑S˘ = galois-hard-⇒ gal

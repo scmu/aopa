@@ -4,6 +4,7 @@ open import Level renaming (_⊔_ to _⊔ℓ_)
 open import Relations
 open import Data.Product
 open import AlgebraicReasoning.Implications
+open import AlgebraicReasoning.Equivalence
 open import Relations.CompChain
 open import Relation.Binary using (IsPreorder; Transitive)
 open import Relation.Binary.PropositionalEquality
@@ -12,7 +13,7 @@ open import Relation.Binary.PropositionalEquality
 
 galois : ∀ {i k} {A B : Set i}
          → (f : A → B) (g : B → A)
-         → (_≼_ : B ← B ⊣ k) (_⊴_ : A ← A  ⊣ k) → Set (i ⊔ℓ k)
+         → (_≼_ : B ← B ⊣ k) (_⊴_ : A ← A ⊣ k) → Set (i ⊔ℓ k)
 galois f g _≼_ _⊴_ = ∀ x y → f x ≼ y ⇔ x ⊴ g y
 
 -- a point-free formulation of Galois connection.
@@ -35,13 +36,28 @@ galois-equiv-⇐ f g _≼_ _⊴_ (f∘≼→⊴∘g , ⊴∘g→f∘≼) x y = (
         ⊴g→f≼ x⊴gy with ⊴∘g→f∘≼ x y (g y , (refl , x⊴gy))
         ... | (._ , fx≼y , refl) = fx≼y
 
-{- to be proved
-galois-equiv-⇒ : ∀ {i k} {A B : Set i}
-                 → (f : A → B) (g : B → A)
-                 → (R : B ← B ⊣ k) (S : A ← A ⊣ k)
-                 → galois f g R S → galois-○ f g R S
-galois-equiv-⇒ f g R S = {!!}
--}
+
+postulate -- to be proved
+
+ monotonic-lower : ∀ {i k} {A B} 
+                   → {f : A → B} {g : B → A} → ∀ {_≼_ _⊴_}
+                   → galois {i} {k} f g _≼_ _⊴_ → 
+                   ∀ {x₀ x₁} → x₀ ⊴ x₁ → f x₀ ≼ f x₁
+
+monotonic-lower-○ : ∀ {i k} {A B} 
+                    → {f : A → B} {g : B → A} → ∀ {_≼_ _⊴_}
+                    → galois {i} {k} f g _≼_ _⊴_ 
+                    → _⊴_ ○ (fun f)˘ ⊑ (fun f)˘ ○ _≼_
+monotonic-lower-○ {i}{k}{A}{B}{f}{g}{R}{S} gal x₀ ._ (x₁ , refl , x₀⊴x₁) = 
+    _ , monotonic-lower {f = f}{g}{R} gal x₀⊴x₁ , refl
+
+postulate -- to be proved
+ galois-equiv-⇒ : ∀ {i k} {A B : Set i}
+                  → (f : A → B) (g : B → A)
+                  → (R : B ← B ⊣ k) (S : A ← A ⊣ k)
+                  → galois f g R S → galois-○ f g R S
+ -- galois-equiv-⇒ f g R S = {!!}
+
 
 transitive-○ : ∀ {i} {A : Set i} {R : A ← A ⊣ i} → IsPreorder (_≡_) R 
                → R ○ R ⊑ R
@@ -49,14 +65,14 @@ transitive-○ {R = R} isPre a₀ a₂ (a₁ , a₁Ra₂ , a₀Ra₁) = R-trans 
   where R-trans : Transitive R
         R-trans = Relation.Binary.IsPreorder.trans isPre
 
-galois-easy : ∀ {i} {A B : Set i}
+galois-easy-⇐ : ∀ {i} {A B : Set i}
               → (f : A → B) (g : B → A)
               → (R : B ← B ⊣ i) (S : A ← A ⊣ i)
               → IsPreorder (_≡_) R 
               → S ○ (fun f)˘ ⊑ (fun f)˘ ○ R
               → fun g ⊑ (fun f)˘ ○ R
               → S ○ fun g ⊑ (fun f)˘ ○ R
-galois-easy f g R S isPre Sf˘⊑f˘R = 
+galois-easy-⇐ f g R S isPre Sf˘⊑f˘R = 
    ⇒-begin 
      fun g ⊑ fun f ˘ ○ R 
    ⇒⟨ ○-monotonic-r ⟩ 
@@ -66,3 +82,17 @@ galois-easy f g R S isPre Sf˘⊑f˘R =
    ⇒⟨ ⊒-trans (○-monotonic-r (transitive-○ isPre)) ⟩ 
      S ○ fun g ⊑ fun f ˘ ○ R 
    ⇒∎
+
+postulate -- to be proved
+  galois-easy-⇒ : ∀ {i} {A B : Set i}
+                  → {f : A → B} {g : B → A}
+                  → {R : B ← B ⊣ i} {S : A ← A ⊣ i}
+                  → galois f g R S 
+                  → fun g ⊑ (fun f)˘ ○ R
+
+  galois-hard-⇒ : ∀ {i} {A B : Set i}
+                  → {f : A → B} {g : B → A}
+                  → {R : B ← B ⊣ i} {S : A ← A ⊣ i}
+                  → galois f g R S 
+                  → fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘ 
+                 
