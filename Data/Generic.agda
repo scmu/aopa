@@ -1,4 +1,4 @@
-module Data.Generic2 where
+module Data.Generic where
 
 open import Sets
 open import Data.Empty
@@ -9,13 +9,12 @@ open import Function using (_∘_; id)
 open import Level renaming (_⊔_ to _⊔ℓ_)
 
 open import Relations
-open import Relations.PowerTrans
+open import Relations.CompChain
 open import AlgebraicReasoning.ExtensionalEquality 
             using (_≐_; ≐-refl; ≐-sym; ≐-trans; ≐-trans'; 
                    pre-∘-cong; post-∘-cong)
 open import AlgebraicReasoning.Implications
-open import AlgebraicReasoning.Sets
-            using (⊆-begin_; _⊆⟨_⟩_; _⊆∎)
+open import AlgebraicReasoning.Relations
 
 -- Polynomial bifunctors
 
@@ -273,11 +272,6 @@ bimapR-monotonic-⊒ (F₁ ⊗ F₂) R⊒S T⊒U (y₁ , y₂) (x₁ , x₂) yRT
 
 mutual
 
-{-
-  foldR : (F : PolyF) → ∀ {i j k} {A : Set i} {B : Set j} 
-                        → (B ← ⟦ F ⟧ A B ⊣ k) → (B ← μ F A)
-  foldR F R b (In xs) = (R ○ bimapR F idR (foldR F R)) b xs -}
-
   foldR : (F : PolyF) → ∀ {A B : Set}
                         → (B ← ⟦ F ⟧ A B ⊣ zero) → (B ← μ F A)
   foldR F R y (In xs) = ∃ (λ ys → mapFoldR F F R ys xs × R y ys)
@@ -294,12 +288,91 @@ mutual
   mapFoldR F (G₀ ⊕ G₁) R (inj₂ x₀) (inj₁ x₁) = ⊥
   mapFoldR F (G₀ ⊕ G₁) R (inj₂ x₀) (inj₂ x₁) = mapFoldR F G₁ R x₀ x₁
   mapFoldR F (G₀ ⊗ G₁) R (x₀ , y₀) (x₁ , y₁) = mapFoldR F G₀ R x₀ x₁ × mapFoldR F G₁ R y₀ y₁
-  
+
+-- Be explicit that mapFoldR F G R is just bimapR G idR (foldR F R).
+
+mapFold-bimap-⊑ : (F G : PolyF) → {A B : Set}
+                → (R : B ← ⟦ F ⟧ A B)
+                → mapFoldR F G R ⊑ bimapR G idR (foldR F R) 
+mapFold-bimap-⊑ F zer R () () mF
+mapFold-bimap-⊑ F one R tt tt mF = Data.Unit.tt
+mapFold-bimap-⊑ F arg₁ R (fst x) (fst ._) refl = refl
+mapFold-bimap-⊑ F arg₂ R (snd ys) (snd xs) mF = mF
+mapFold-bimap-⊑ F (G₀ ⊕ G₁) R (inj₁ y) (inj₁ x) mF = mapFold-bimap-⊑ F G₀ R y x mF
+mapFold-bimap-⊑ F (G₀ ⊕ G₁) R (inj₁ y) (inj₂ x) ()
+mapFold-bimap-⊑ F (G₀ ⊕ G₁) R (inj₂ y) (inj₁ x) ()
+mapFold-bimap-⊑ F (G₀ ⊕ G₁) R (inj₂ y) (inj₂ x) mF = mapFold-bimap-⊑ F G₁ R y x mF
+mapFold-bimap-⊑ F (G₀ ⊗ G₁) R (x₀ , y₀) (x₁ , y₁) (mF₀ , mF₁) = 
+   mapFold-bimap-⊑ F G₀ R x₀ x₁ mF₀ ,
+   mapFold-bimap-⊑ F G₁ R y₀ y₁ mF₁
+
+mapFold-bimap-⊒ : (F G : PolyF) → {A B : Set}
+                → (R : B ← ⟦ F ⟧ A B)
+                → mapFoldR F G R ⊒ bimapR G idR (foldR F R) 
+mapFold-bimap-⊒ F zer R () () bm
+mapFold-bimap-⊒ F one R tt tt bm = Data.Unit.tt
+mapFold-bimap-⊒ F arg₁ R (fst x) (fst ._) refl = refl
+mapFold-bimap-⊒ F arg₂ R (snd ys) (snd xs) bm = bm
+mapFold-bimap-⊒ F (G₀ ⊕ G₁) R (inj₁ y) (inj₁ x) bm = mapFold-bimap-⊒ F G₀ R y x bm
+mapFold-bimap-⊒ F (G₀ ⊕ G₁) R (inj₁ y) (inj₂ x) ()
+mapFold-bimap-⊒ F (G₀ ⊕ G₁) R (inj₂ y) (inj₁ x) ()
+mapFold-bimap-⊒ F (G₀ ⊕ G₁) R (inj₂ y) (inj₂ x) bm = mapFold-bimap-⊒ F G₁ R y x bm
+mapFold-bimap-⊒ F (G₀ ⊗ G₁) R (x₀ , y₀) (x₁ , y₁) (bm₀ , bm₁) = 
+   mapFold-bimap-⊒ F G₀ R x₀ x₁ bm₀ ,
+   mapFold-bimap-⊒ F G₁ R y₀ y₁ bm₁
+
+mapFold-bimap : (F G : PolyF) → {A B : Set}
+              → (R : B ← ⟦ F ⟧ A B)
+              → mapFoldR F G R ≑ bimapR G idR (foldR F R)
+mapFold-bimap F G R = (mapFold-bimap-⊑ F G R) , (mapFold-bimap-⊒ F G R)
+
+-- computation rules:
+--  foldR F R ○ fun In ≑ R ○ bimapR F idR (foldR F R)
+
+foldR-computation'-⊑ : (F : PolyF) → {A B : Set}
+                     → (R : B ← ⟦ F ⟧ A B)
+                     → foldR F R ○ fun In ⊑ R ○ mapFoldR F F R
+foldR-computation'-⊑ F R b xs (._ , refl , p) = p
+
+foldR-computation'-⊒ : (F : PolyF) → {A B : Set}
+                     → (R : B ← ⟦ F ⟧ A B)
+                     → foldR F R ○ fun In ⊒ R ○ mapFoldR F F R
+foldR-computation'-⊒ F R b xs p = In xs , refl , p
+
+foldR-computation-⊑ : (F : PolyF) → {A B : Set}
+                     → (R : B ← ⟦ F ⟧ A B)
+                     → (foldR F R ○ fun In ⊑ R ○ bimapR F idR (foldR F R))
+foldR-computation-⊑ F R = 
+  ⊑-begin 
+    foldR F R ○ fun In
+  ⊑⟨ foldR-computation'-⊑ F R ⟩ 
+    R ○ mapFoldR F F R 
+  ⊑⟨ ○-monotonic-r (mapFold-bimap-⊑ F F R) ⟩ 
+    R ○ bimapR F idR (foldR F R) 
+  ⊑∎
+
+foldR-computation-⊒ : (F : PolyF) → {A B : Set}
+                     → (R : B ← ⟦ F ⟧ A B)
+                     → (foldR F R ○ fun In ⊒ R ○ bimapR F idR (foldR F R))
+foldR-computation-⊒ F R = 
+  ⊒-begin 
+    foldR F R ○ fun In
+  ⊒⟨ foldR-computation'-⊒ F R ⟩ 
+    R ○ mapFoldR F F R 
+  ⊒⟨ ○-monotonic-r (mapFold-bimap-⊒ F F R) ⟩ 
+    R ○ bimapR F idR (foldR F R) 
+  ⊒∎
+
+foldR-computation : (F : PolyF) → {A B : Set}
+                  → (R : B ← ⟦ F ⟧ A B)
+                  → (foldR F R ○ fun In ≑ R ○ bimapR F idR (foldR F R))
+foldR-computation F R = foldR-computation-⊑ F R , foldR-computation-⊒ F R
 
 postulate
  eilenberg-wright : ∀ (F : PolyF) → {A B : Set} → (R : B ← ⟦ F ⟧ A B) 
                     → foldR F R ≑ ∈ ₁∘ fold F (Λ (R ○ bimapR F idR ∈))
 
+-- universal properties.
 
 mutual
 
@@ -329,6 +402,23 @@ mutual
   mapFoldR-univ-⇐-⊑ F (G₀ ⊗ G₁) S R hom (x₀ , y₀) (x₁ , y₁) (bm₀ , bm₁) = 
     mapFoldR-univ-⇐-⊑ F G₀ S R hom x₀ x₁ bm₀ ,
     mapFoldR-univ-⇐-⊑ F G₁ S R hom y₀ y₁ bm₁
+
+{- not gotta work. 
+foldR-universal-⇒-⊑ : (F : PolyF) → {A B : Set}
+                    → (S : B ← μ F A) → (R : B ← ⟦ F ⟧ A B)
+                    → (S ⊑ foldR F R)
+                    → (S ○ fun In ⊑ R ○ bimapR F idR S)
+foldR-universal-⇒-⊑ F S R  =
+  ⇒-begin 
+   S ⊑ foldR F R 
+  ⇒⟨ ○-monotonic-l ⟩ 
+   S ○ fun In ⊑ foldR F R ○ fun In 
+  ⇒⟨ ⊒-trans (foldR-computation-⊑ F R) ⟩ 
+   S ○ fun In ⊑ R ○ bimapR F idR (foldR F R) 
+  ⇒⟨ {!!} ⟩ 
+   S ○ fun In ⊑ R ○ bimapR F idR S
+  ⇒∎ 
+-}
 
 {-
 mutual
@@ -384,6 +474,49 @@ mutual
     mapFoldR-univ-⇐-⊒ F G₀ S R hom x₀ x₁ bm₀ ,
     mapFoldR-univ-⇐-⊒ F G₁ S R hom y₀ y₁ bm₁
 
-foldR-computation-⊑ : (F : PolyF) → {A B : Set}
-                     → (R : B ← ⟦ F ⟧ A B)
-                     → (foldR F R ○ fun In ⊑ R ○ bimapR F idR (foldR F R))
+
+-- Fusion Theorems
+
+foldR-fusion-⊒ : (F : PolyF) → {A B C : Set}
+               → (S : C ← B) → (R : B ← ⟦ F ⟧ A B) → (T : C ← ⟦ F ⟧ A C)
+               → (S ○ R ⊒ T ○ bimapR F idR S)
+               → (S ○ foldR F R ⊒ foldR F T)
+foldR-fusion-⊒ F S R T = 
+   ⇐-begin
+     foldR F T ⊑ S ○ foldR F R 
+   ⇐⟨ foldR-universal-⇐-⊒ F (S ○ foldR F R) T ⟩ 
+     T ○ bimapR F idR (S ○ foldR F R) ⊑ (S ○ foldR F R) ○ fun In
+   ⇐⟨ ⊒-trans ○-assocl ⟩
+     T ○ bimapR F idR (S ○ foldR F R) ⊑ S ○ foldR F R ○ fun In
+   ⇐⟨ ⊒-trans (○-monotonic-r (foldR-computation-⊒ F R)) ⟩ 
+     T ○ bimapR F idR (S ○ foldR F R) ⊑ S ○ R ○ bimapR F idR (foldR F R)
+   ⇐⟨ ⊑-trans (○-monotonic-r (bimapR-monotonic-⊑ F id-idempotent-⊒ ⊑-refl)) ⟩ 
+     T ○ bimapR F (idR ○ idR) (S ○ foldR F R) ⊑ S ○ R ○ bimapR F idR (foldR F R)
+   ⇐⟨ ⊑-trans (○-monotonic-r (bimapR-functor-⊒ F)) ⟩ 
+     T ○ bimapR F idR S ○ bimapR F idR (foldR F R) ⊑
+              S ○ R ○ bimapR F idR (foldR F R)
+   ⇐⟨ ⇦-mono-l (T ● bimapR F idR S ‥) (S ● R ‥) ⟩ 
+     T ○ bimapR F idR S ⊑ S ○ R 
+   ⇐∎
+
+foldR-fusion-⊑ : (F : PolyF) → {A B C : Set}
+               → (S : C ← B) → (R : B ← ⟦ F ⟧ A B) → (T : C ← ⟦ F ⟧ A C)
+               → (S ○ R ⊑ T ○ bimapR F idR S)
+               → (S ○ foldR F R ⊑ foldR F T)
+foldR-fusion-⊑ F S R T = 
+   ⇐-begin
+     S ○ foldR F R ⊑ foldR F T 
+   ⇐⟨ foldR-universal-⇐-⊑ F (S ○ foldR F R) T ⟩ 
+    (S ○ foldR F R) ○ fun In ⊑ T ○ bimapR F idR (S ○ foldR F R) 
+   ⇐⟨ ⊑-trans ○-assocr ⟩
+     S ○ foldR F R ○ fun In ⊑ T ○ bimapR F idR (S ○ foldR F R)  
+   ⇐⟨ ⊑-trans (○-monotonic-r (foldR-computation-⊑ F R)) ⟩ 
+     S ○ R ○ bimapR F idR (foldR F R) ⊑ T ○ bimapR F idR (S ○ foldR F R)  
+   ⇐⟨ ⊒-trans (○-monotonic-r (bimapR-monotonic-⊒ F id-idempotent-⊑ ⊒-refl)) ⟩ 
+     S ○ R ○ bimapR F idR (foldR F R) ⊑ T ○ bimapR F (idR ○ idR) (S ○ foldR F R) 
+   ⇐⟨ ⊒-trans (○-monotonic-r (bimapR-functor-⊑ F)) ⟩ 
+     S ○ R ○ bimapR F idR (foldR F R) ⊑
+       T ○ bimapR F idR S ○ bimapR F idR (foldR F R) 
+   ⇐⟨ ⇦-mono-l (S ● R ‥) (T ● bimapR F idR S ‥)  ⟩ 
+     S ○ R ⊑ T ○ bimapR F idR S
+   ⇐∎
