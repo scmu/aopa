@@ -36,6 +36,15 @@ galois-equiv-⇐ f g _≼_ _⊴_ (f∘≼→⊴∘g , ⊴∘g→f∘≼) x y = (
         ⊴g→f≼ x⊴gy with ⊴∘g→f∘≼ x y (g y , (refl , x⊴gy))
         ... | (._ , fx≼y , refl) = fx≼y
 
+galois-equiv-⇒ : ∀ {i k} {A B : Set i}
+                  → (f : A → B) (g : B → A)
+                  → (R : B ← B ⊣ k) (S : A ← A ⊣ k)
+                  → galois f g R S → galois-○ f g R S
+galois-equiv-⇒ f g R S gal = f˘R⊑Sg , Sg⊑f˘R
+  where f˘R⊑Sg : fun f ˘ ○ R ⊑ S ○ fun g
+        f˘R⊑Sg x y (._ , fxRy , refl) = g y , refl , proj₁ (gal x y) fxRy
+        Sg⊑f˘R : S ○ fun g ⊑ fun f ˘ ○ R
+        Sg⊑f˘R x y (._ , refl , xSgy) = f x , proj₂ (gal x y) xSgy , refl
 
 postulate -- to be proved
 
@@ -50,13 +59,6 @@ monotonic-lower-○ : ∀ {i k} {A B}
                     → _⊴_ ○ (fun f)˘ ⊑ (fun f)˘ ○ _≼_
 monotonic-lower-○ {i}{k}{A}{B}{f}{g}{R}{S} gal x₀ ._ (x₁ , refl , x₀⊴x₁) = 
     _ , monotonic-lower {f = f}{g}{R} gal x₀⊴x₁ , refl
-
-postulate -- to be proved
- galois-equiv-⇒ : ∀ {i k} {A B : Set i}
-                  → (f : A → B) (g : B → A)
-                  → (R : B ← B ⊣ k) (S : A ← A ⊣ k)
-                  → galois f g R S → galois-○ f g R S
- -- galois-equiv-⇒ f g R S = {!!}
 
 
 transitive-○ : ∀ {i} {A : Set i} {R : A ← A ⊣ i} → IsPreorder (_≡_) R 
@@ -77,7 +79,8 @@ galois-easy-⇐ f g R S isPre Sf˘⊑f˘R =
      fun g ⊑ fun f ˘ ○ R 
    ⇒⟨ ○-monotonic-r ⟩ 
      S ○ fun g ⊑ S ○ fun f ˘ ○ R 
-   ⇒⟨ ⊒-trans (⇦-mono-l (S ● (fun f ˘) ‥) (fun f ˘ ● R ‥) Sf˘⊑f˘R) ⟩ 
+   ⇒⟨ ⊒-trans (⇦-mono-l (S ● (fun f ˘) ‥) 
+                        (fun f ˘ ● R ‥) Sf˘⊑f˘R) ⟩ 
      S ○ fun g ⊑ fun f ˘ ○ R ○ R 
    ⇒⟨ ⊒-trans (○-monotonic-r (transitive-○ isPre)) ⟩ 
      S ○ fun g ⊑ fun f ˘ ○ R 
