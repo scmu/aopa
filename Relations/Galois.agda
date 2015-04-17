@@ -2,6 +2,7 @@ module Relations.Galois where
 
 open import Level renaming (_⊔_ to _⊔ℓ_)
 open import Relations
+open import Function using (flip)
 open import Data.Product
 open import AlgebraicReasoning.Implications
 open import AlgebraicReasoning.Equivalence
@@ -36,29 +37,43 @@ galois-equiv-⇐ f g _≼_ _⊴_ (f∘≼→⊴∘g , ⊴∘g→f∘≼) x y = (
         ⊴g→f≼ x⊴gy with ⊴∘g→f∘≼ x y (g y , (refl , x⊴gy))
         ... | (._ , fx≼y , refl) = fx≼y
 
+
+
+monotonic-lower : ∀ {i k} {A B} 
+                   → {f : A → B} {g : B → A} → ∀ {_≼_ _⊴_}
+                   → IsPreorder (_≡_) _≼_ → IsPreorder (_≡_) _⊴_
+                   → galois {i} {k} f g _≼_ _⊴_ → 
+                   ∀ {x₀ x₁} → x₀ ⊴ x₁ → f x₀ ≼ f x₁
+monotonic-lower {f = f} {g} {_≼_} {_⊴_} ≼-isPre ⊴-isPre gal {x₀ = x₀} {x₁} = 
+  ⇒-begin
+    x₀ ⊴ x₁
+  ⇒⟨ flip (Relation.Binary.IsPreorder.trans ⊴-isPre) x⊴gfx ⟩
+    x₀ ⊴ g (f x₁)
+  ⇒⟨ proj₂ (gal x₀ (f x₁)) ⟩
+    f x₀ ≼ f x₁
+  ⇒∎
+ where
+   x⊴gfx : ∀ {x} → x ⊴ g (f x)
+   x⊴gfx {x} = proj₁ (gal x (f x)) (Relation.Binary.IsPreorder.refl ≼-isPre)
+
+monotonic-lower-○ : ∀ {i k} {A B} 
+                    → {f : A → B} {g : B → A} → ∀ {_≼_ _⊴_}
+                    → IsPreorder (_≡_) _≼_ → IsPreorder (_≡_) _⊴_
+                    → galois {i} {k} f g _≼_ _⊴_
+                    → _⊴_ ○ (fun f)˘ ⊑ (fun f)˘ ○ _≼_
+monotonic-lower-○ {i}{k}{A}{B}{f}{g}{R}{S} gal ≼-isPre ⊴-isPre  x₀ ._ (x₁ , refl , x₀⊴x₁) = 
+    _ , monotonic-lower {f = f}{g}{R} gal ≼-isPre ⊴-isPre x₀⊴x₁ , refl
+
+
 galois-equiv-⇒ : ∀ {i k} {A B : Set i}
-                  → (f : A → B) (g : B → A)
-                  → (R : B ← B ⊣ k) (S : A ← A ⊣ k)
-                  → galois f g R S → galois-○ f g R S
+                 → (f : A → B) (g : B → A)
+                 → (R : B ← B ⊣ k) (S : A ← A ⊣ k)
+                 → galois f g R S → galois-○ f g R S
 galois-equiv-⇒ f g R S gal = f˘R⊑Sg , Sg⊑f˘R
   where f˘R⊑Sg : fun f ˘ ○ R ⊑ S ○ fun g
         f˘R⊑Sg x y (._ , fxRy , refl) = g y , refl , proj₁ (gal x y) fxRy
         Sg⊑f˘R : S ○ fun g ⊑ fun f ˘ ○ R
         Sg⊑f˘R x y (._ , refl , xSgy) = f x , proj₂ (gal x y) xSgy , refl
-
-postulate -- to be proved
-
- monotonic-lower : ∀ {i k} {A B} 
-                   → {f : A → B} {g : B → A} → ∀ {_≼_ _⊴_}
-                   → galois {i} {k} f g _≼_ _⊴_ → 
-                   ∀ {x₀ x₁} → x₀ ⊴ x₁ → f x₀ ≼ f x₁
-
-monotonic-lower-○ : ∀ {i k} {A B} 
-                    → {f : A → B} {g : B → A} → ∀ {_≼_ _⊴_}
-                    → galois {i} {k} f g _≼_ _⊴_ 
-                    → _⊴_ ○ (fun f)˘ ⊑ (fun f)˘ ○ _≼_
-monotonic-lower-○ {i}{k}{A}{B}{f}{g}{R}{S} gal x₀ ._ (x₁ , refl , x₀⊴x₁) = 
-    _ , monotonic-lower {f = f}{g}{R} gal x₀⊴x₁ , refl
 
 
 transitive-○ : ∀ {i} {A : Set i} {R : A ← A ⊣ i} → IsPreorder (_≡_) R 
@@ -79,23 +94,52 @@ galois-easy-⇐ f g R S isPre Sf˘⊑f˘R =
      fun g ⊑ fun f ˘ ○ R 
    ⇒⟨ ○-monotonic-r ⟩ 
      S ○ fun g ⊑ S ○ fun f ˘ ○ R 
-   ⇒⟨ ⊒-trans (⇦-mono-l (S ● (fun f ˘) ‥) 
-                        (fun f ˘ ● R ‥) Sf˘⊑f˘R) ⟩ 
+   ⇒⟨ ⊒-trans (⇦-mono-l (S ● (fun f ˘) ‥) (fun f ˘ ● R ‥) Sf˘⊑f˘R) ⟩ 
      S ○ fun g ⊑ fun f ˘ ○ R ○ R 
    ⇒⟨ ⊒-trans (○-monotonic-r (transitive-○ isPre)) ⟩ 
      S ○ fun g ⊑ fun f ˘ ○ R 
    ⇒∎
 
-postulate -- to be proved
-  galois-easy-⇒ : ∀ {i} {A B : Set i}
-                  → {f : A → B} {g : B → A}
-                  → {R : B ← B ⊣ i} {S : A ← A ⊣ i}
-                  → galois f g R S 
-                  → fun g ⊑ (fun f)˘ ○ R
 
-  galois-hard-⇒ : ∀ {i} {A B : Set i}
-                  → {f : A → B} {g : B → A}
-                  → {R : B ← B ⊣ i} {S : A ← A ⊣ i}
-                  → galois f g R S 
-                  → fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘ 
-                 
+galois-easy-⇒ : ∀ {i} {A B : Set i}
+                → {f : A → B} {g : B → A}
+                → {R : B ← B ⊣ i} {S : A ← A ⊣ i}
+                → IsPreorder (_≡_) S
+                → galois f g R S 
+                → fun g ⊑ (fun f)˘ ○ R
+galois-easy-⇒ {f = f} {g} {R} {S} isPre =
+   ⇒-begin
+     galois f g R S
+   ⇒⟨ galois-equiv-⇒ f g R S ⟩
+     galois-○ f g R S
+   ⇒⟨ proj₂ ⟩
+     S ○ fun g ⊑ (fun f)˘ ○ R
+   ⇒⟨ ⊑-trans (○-monotonic-l idR⊑S) ⟩
+     idR ○ fun g ⊑ (fun f)˘ ○ R
+   ⇒⟨ ⊑-trans id-elim-l ⟩
+     fun g ⊑ (fun f) ˘ ○ R
+   ⇒∎
+  where
+    idR⊑S : idR ⊑ S
+    idR⊑S _ ._ refl = Relation.Binary.IsPreorder.refl isPre
+
+
+galois-hard-⇒ : ∀ {i} {A B : Set i}
+                → {f : A → B} {g : B → A}
+                → {R : B ← B ⊣ i} {S : A ← A ⊣ i}
+                → galois f g R S 
+                → fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘ 
+galois-hard-⇒ {f = f} {g} {R} {S} =
+   ⇒-begin
+     galois f g R S
+   ⇒⟨ galois-equiv-⇒ f g R S ⟩
+     galois-○ f g R S
+   ⇒⟨ proj₁ ⟩
+     fun f ˘ ○ R ⊑ S ○ fun g
+   ⇒⟨ ˘-monotonic ⟩
+     (fun f ˘ ○ R) ˘ ⊑ (S ○ fun g) ˘
+   ⇒⟨ ⊒-trans ˘-○-distr-⊑ ⟩
+     (fun f ˘ ○ R) ˘ ⊑ (fun g) ˘ ○ S ˘
+   ⇒⟨ shunting-l-⇐ ⟩
+     fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘
+   ⇒∎

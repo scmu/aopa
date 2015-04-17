@@ -115,6 +115,11 @@ R ≑ S = (R ⊑ S × S ⊑ R)
 _˘ : ∀ {i j k} {A : Set i} {B : Set j} → (B ← A ⊣ k) → A ← B
 (r ˘) a b = r b a
 
+˘-monotonic : ∀ {i j k} {A : Set i} {B : Set j}
+                {R S : B ← A ⊣ k}
+              → R ⊑ S → R ˘ ⊑ S ˘
+˘-monotonic R⊑S a b = R⊑S b a
+
 infixr 8 _·_ 
 infixr 9 _○_ _₁∘_
 
@@ -143,6 +148,15 @@ _₁∘₁_ : ∀ {k} {A : Set} {B : Set1} {C : Set1} → (C ← B ⊣ k) → (A
 (R ₁∘₁ S) c a = R c (S a) 
 -}
 
+˘-○-distr-⊑ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k}
+                {R : C ← B ⊣ k} {S : B ← A ⊣ l} 
+              → (R ○ S) ˘ ⊑ (S ˘) ○ (R ˘)
+˘-○-distr-⊑ a c (b , bSa , cRb) = (b , cRb , bSa)
+
+˘-○-distr-⊒ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k}
+                {R : C ← B ⊣ k} {S : B ← A ⊣ l} 
+              → (R ○ S) ˘ ⊒ (S ˘) ○ (R ˘)
+˘-○-distr-⊒ a c (b , cRb , bSa) = (b , bSa , cRb)
 
 ○-assocl : ∀ {i j k l m n o} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
             → {R : D ← C ⊣ m} {S : C ← B ⊣ n} {T : B ← A ⊣ o}
@@ -202,6 +216,32 @@ fun f b a = f a ≡ b
 fun-comp : ∀ {i j} {A : Set i} {B : Set j} {C : Set j} {f : B → C} {g : A → B} →
             fun (f ∘ g)  ⊑  fun f ○ fun g
 fun-comp {g = g} c a fga≡c = (g a , refl , fga≡c)
+
+
+-- shunting rules
+
+shunting-l-⇒ : ∀ {i j} {A : Set i} {B C : Set j}
+                 {f : B → C} {R : B ← A ⊣ j} {S : C ← A ⊣ j}
+               → (fun f) ○ R ⊑ S → R ⊑ (fun f ˘) ○ S
+shunting-l-⇒ {f = f} fR⊑S b a bRa = (f b , fR⊑S (f b) a (b , bRa , refl) , refl)
+
+shunting-l-⇐ : ∀ {i j} {A : Set i} {B C : Set j}
+                 {f : B → C} {R : B ← A ⊣ j} {S : C ← A ⊣ j}
+               → R ⊑ (fun f ˘) ○ S → (fun f) ○ R ⊑ S
+shunting-l-⇐ R⊑f˘S ._ a (b , bRa , refl) with R⊑f˘S b a bRa
+... | (._ , fbSa , refl) = fbSa
+
+shunting-r-⇒ : ∀ {i j} {A : Set i} {B : Set i} {C : Set j}
+                 {f : B → A} {R : C ← B ⊣ i} {S : C ← A ⊣ i}
+               → R ○ (fun f ˘) ⊑ S → R ⊑ S ○ (fun f)
+shunting-r-⇒ {f = f} Rf˘⊑S c b cRb = (f b , refl , Rf˘⊑S c (f b) (b , refl , cRb))
+
+shunting-r-⇐ : ∀ {i j} {A : Set i} {B : Set i} {C : Set j}
+                 {f : B → A} {R : C ← B ⊣ i} {S : C ← A ⊣ i}
+               → R ⊑ S ○ (fun f) → R ○ (fun f ˘) ⊑ S
+shunting-r-⇐ R⊑Sf c ._ (b , refl , bRc) with R⊑Sf c b bRc
+... | (._ , refl , cSfb) = cSfb
+
 
 idR : ∀ {i} {A : Set i} → A ← A
 idR = fun id
