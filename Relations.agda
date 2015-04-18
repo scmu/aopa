@@ -217,32 +217,6 @@ fun-comp : ∀ {i j} {A : Set i} {B : Set j} {C : Set j} {f : B → C} {g : A �
             fun (f ∘ g)  ⊑  fun f ○ fun g
 fun-comp {g = g} c a fga≡c = (g a , refl , fga≡c)
 
-
--- shunting rules
-
-shunting-l-⇒ : ∀ {i j} {A : Set i} {B C : Set j}
-                 {f : B → C} {R : B ← A ⊣ j} {S : C ← A ⊣ j}
-               → (fun f) ○ R ⊑ S → R ⊑ (fun f ˘) ○ S
-shunting-l-⇒ {f = f} fR⊑S b a bRa = (f b , fR⊑S (f b) a (b , bRa , refl) , refl)
-
-shunting-l-⇐ : ∀ {i j} {A : Set i} {B C : Set j}
-                 {f : B → C} {R : B ← A ⊣ j} {S : C ← A ⊣ j}
-               → R ⊑ (fun f ˘) ○ S → (fun f) ○ R ⊑ S
-shunting-l-⇐ R⊑f˘S ._ a (b , bRa , refl) with R⊑f˘S b a bRa
-... | (._ , fbSa , refl) = fbSa
-
-shunting-r-⇒ : ∀ {i j} {A : Set i} {B : Set i} {C : Set j}
-                 {f : B → A} {R : C ← B ⊣ i} {S : C ← A ⊣ i}
-               → R ○ (fun f ˘) ⊑ S → R ⊑ S ○ (fun f)
-shunting-r-⇒ {f = f} Rf˘⊑S c b cRb = (f b , refl , Rf˘⊑S c (f b) (b , refl , cRb))
-
-shunting-r-⇐ : ∀ {i j} {A : Set i} {B : Set i} {C : Set j}
-                 {f : B → A} {R : C ← B ⊣ i} {S : C ← A ⊣ i}
-               → R ⊑ S ○ (fun f) → R ○ (fun f ˘) ⊑ S
-shunting-r-⇐ R⊑Sf c ._ (b , refl , bRc) with R⊑Sf c b bRc
-... | (._ , refl , cSfb) = cSfb
-
-
 idR : ∀ {i} {A : Set i} → A ← A
 idR = fun id
 
