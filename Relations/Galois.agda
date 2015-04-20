@@ -7,6 +7,7 @@ open import Data.Product
 open import AlgebraicReasoning.Implications
 open import AlgebraicReasoning.Equivalence
 open import Relations.Function
+open import Relations.Converse
 open import Relations.CompChain
 open import Relation.Binary using (IsPreorder; Transitive)
 open import Relation.Binary.PropositionalEquality
@@ -137,9 +138,9 @@ galois-hard-⇒ {f = f} {g} {R} {S} =
      galois-○ f g R S
    ⇒⟨ proj₁ ⟩
      fun f ˘ ○ R ⊑ S ○ fun g
-   ⇒⟨ ˘-monotonic ⟩
+   ⇒⟨ ˘-monotonic-⇐ ⟩
      (fun f ˘ ○ R) ˘ ⊑ (S ○ fun g) ˘
-   ⇒⟨ ⊒-trans ˘-○-distr-⊑ ⟩
+   ⇒⟨ ⊒-trans (˘-○-distr-⊑ S (fun g)) ⟩
      (fun f ˘ ○ R) ˘ ⊑ (fun g) ˘ ○ S ˘
    ⇒⟨ R⊑f˘S⇒fR⊑S ⟩
      fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘

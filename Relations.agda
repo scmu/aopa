@@ -115,10 +115,6 @@ R ≑ S = (R ⊑ S × S ⊑ R)
 _˘ : ∀ {i j k} {A : Set i} {B : Set j} → (B ← A ⊣ k) → A ← B
 (r ˘) a b = r b a
 
-˘-monotonic : ∀ {i j k} {A : Set i} {B : Set j}
-                {R S : B ← A ⊣ k}
-              → R ⊑ S → R ˘ ⊑ S ˘
-˘-monotonic R⊑S a b = R⊑S b a
 
 infixr 8 _·_ 
 infixr 9 _○_ _₁∘_
@@ -147,16 +143,6 @@ _₁∘_ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} → (C ← B ⊣ l)
 _₁∘₁_ : ∀ {k} {A : Set} {B : Set1} {C : Set1} → (C ← B ⊣ k) → (A → B) → (C ← A)
 (R ₁∘₁ S) c a = R c (S a) 
 -}
-
-˘-○-distr-⊑ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k}
-                {R : C ← B ⊣ k} {S : B ← A ⊣ l} 
-              → (R ○ S) ˘ ⊑ (S ˘) ○ (R ˘)
-˘-○-distr-⊑ a c (b , bSa , cRb) = (b , cRb , bSa)
-
-˘-○-distr-⊒ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k}
-                {R : C ← B ⊣ k} {S : B ← A ⊣ l} 
-              → (R ○ S) ˘ ⊒ (S ˘) ○ (R ˘)
-˘-○-distr-⊒ a c (b , cRb , bSa) = (b , bSa , cRb)
 
 ○-assocl : ∀ {i j k l m n o} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
             → {R : D ← C ⊣ m} {S : C ← B ⊣ n} {T : B ← A ⊣ o}
