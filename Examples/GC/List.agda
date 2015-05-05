@@ -33,6 +33,13 @@ cons : ∀ {i} {A : Set i} → (List A ← ⟦ arg₁ ⊗ arg₂ ⟧ A (List A))
 cons = (fun In) ○ (fun inj₂)
 
 
+[]-nil : ∀ {i} {A : Set i} → nil {A = A} [] tt
+[]-nil = (inj₁ tt , refl , refl)
+
+∷-cons : ∀ {i} {A : Set i} {x : A} {xs : List A} → cons (x ∷ xs) (fst x , snd xs)
+∷-cons = (inj₂ _ , refl , refl)
+
+{-
 [nil,cons]⊑In : ∀ {i} {A : Set i} → [ nil {A = A} , cons ] ⊑ fun In
 [nil,cons]⊑In (In (inj₁ tt)) .(inj₁ tt) (inj₁ (tt , refl , _)) = refl
 [nil,cons]⊑In (In (inj₂ a)) .(inj₁ tt) (inj₁ (tt , refl , .(inj₁ tt) , refl , ()))
@@ -42,6 +49,8 @@ cons = (fun In) ○ (fun inj₂)
 [nil,cons]⊒In : ∀ {i} {A : Set i} → fun In ⊑ [ nil {A = A} , cons ]
 [nil,cons]⊒In (In .(inj₁ tt)) (inj₁ tt) refl = inj₁ (tt , refl , (inj₁ tt) , refl , refl)
 [nil,cons]⊒In (In .(inj₂ a)) (inj₂ a) refl = inj₂ (a , refl , (inj₂ a) , refl , refl)
+-}
+
 
 -- prefix operator
 
@@ -50,6 +59,13 @@ _≼_ = foldR ListF [ nil , (nil ○ !) ⊔ cons ]
 
 _≽_ : {A : Set} → (List A ← List A)
 ys ≽ xs = xs ≼ ys
+
+≼-universal₁ : ∀ {A} {xs : List A} → [] ≼ xs
+≼-universal₁ {xs = In (inj₁ tt)} = (inj₁ tt , Data.Unit.tt , inj₁ (tt , refl , []-nil))
+≼-universal₁ {xs = In (inj₂ (fst x , snd xs))} = (inj₂ (fst x , snd []) , (refl , ≼-universal₁) , inj₂ (_ , refl , inj₁ (tt , refl , []-nil)))
+
+≼-universal₂ : ∀ {A} {x : A} {xs ys : List A} → xs ≼ ys → (x ∷ xs) ≼ (x ∷ ys)
+≼-universal₂ {x = x} {xs} xs≼ys = (inj₂ (fst x , snd xs) , (refl , xs≼ys) , inj₂ (_ , refl , inj₂ ∷-cons))
 
 
 
@@ -131,8 +147,8 @@ ys ≽ xs = xs ≼ ys
 
 
 ≼-refl : ∀ {A : Set} {xs ys : List A} → xs ≡ ys → xs ≼ ys
-≼-refl {xs = In (inj₁ tt)} refl = (inj₁ tt , Data.Unit.tt , inj₁ (tt , refl , (inj₁ tt) , refl , refl))
-≼-refl {xs = In (inj₂ (fst x , snd xs))} refl = (inj₂ (fst x , snd xs) , (refl , ≼-refl refl) , inj₂ (_ , refl , inj₂ (_ , refl , refl)))
+≼-refl {xs = In (inj₁ tt)} refl = (inj₁ tt , Data.Unit.tt , (inj₁ (tt , refl , []-nil)))
+≼-refl {xs = In (inj₂ (fst x , snd xs))} refl = (inj₂ (fst x , snd xs) , (refl , ≼-refl refl) , inj₂ (_ , refl , inj₂ ∷-cons))
 
 ≼-trans : ∀ {A : Set} {xs ys zs : List A} → xs ≼ ys → ys ≼ zs → xs ≼ zs
 ≼-trans {xs = xs} {ys} {zs} xs≼ys ys≼zs = foldR-fusion-⊑ ListF _≼_ [ nil , (nil ○ !) ⊔ cons ] [ nil , (nil ○ !) ⊔ cons ] fuse-cond xs zs (ys , ys≼zs , xs≼ys)
