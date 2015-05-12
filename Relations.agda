@@ -49,6 +49,10 @@ R ⊑ S = ∀ b a → R b a → S b a
                 → R ⊑ S × R ⊑ T → R ⊑ S ⊓ T
 ⊓-universal-⇐ (R⊑S , R⊑T) a b bRa = (R⊑S a b bRa , R⊑T a b bRa)
 
+⊓-commute : ∀ {i j k} {A : Set i} {B : Set j} {R S : B ← A ⊣ k}
+            → R ⊓ S ⊑ S ⊓ R
+⊓-commute b a (bRa , bSa) = bSa , bRa     
+
 ⊑-⊓ : ∀ {i j k} {A : Set i} {B : Set j} 
       → (R S T : B ← A ⊣ k) → R ⊑ S ⊓ T → (R ⊑ S) × (R ⊑ T)
 ⊑-⊓ R S T = ⊓-universal-⇒
@@ -192,6 +196,15 @@ modular-law c a ((b , bSa , cRb) , cTa) = b , (bSa , (c , cTa , cRb)) , cRb
                 → (R ⊔ S) ○ T ⊒ (R ○ T) ⊔ (S ○ T)
 ○-⊔-distr-r-⊒ a c (inj₁ (b , bTa , cRb)) = b , bTa , inj₁ cRb
 ○-⊔-distr-r-⊒ a c (inj₂ (b , bTa , cSb)) = b , bTa , inj₂ cSb
+
+○-⊓-distr-l : ∀ {i j k l} {A : Set i} {B C : Set j} {R : C ← B ⊣ k} {S : B ← A ⊣ l} {T : B ← A} 
+              → R ○ (S ⊓ T) ⊑ (R ○ S) ⊓ (R ○ T)
+○-⊓-distr-l a c (b , (bSc , bTc) , aRb) = (b , bSc , aRb) , (b , bTc , aRb)
+
+○-⊓-distr-r : ∀ {i j k l} {A : Set i} {B C : Set j} {R : C ← B ⊣ k} {S : C ← B ⊣ k} {T : B ← A ⊣ l} 
+              → (R ⊓ S) ○ T ⊑ (R ○ T) ⊓ (S ○ T)
+○-⊓-distr-r a c (b , bTc , aRb , aSb) = (b , bTc , aRb) , (b , bTc , aSb)
+
 
 -- Primitive Relations
 

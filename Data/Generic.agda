@@ -13,6 +13,7 @@ open import Relations.Factor
 open import Relations.Function
 open import Relations.Converse
 open import Relations.CompChain
+open import FixedPoint
 open import AlgebraicReasoning.ExtensionalEquality 
             using (_≐_; ≐-refl; ≐-sym; ≐-trans; ≐-trans'; 
                    pre-∘-cong; post-∘-cong)
@@ -533,6 +534,40 @@ foldR-monotonic F R S =
     R ⊑ S
   ⇐∎
 
+mutual
+  idR-foldR-⊑ : (F : PolyF) → ∀ {A} → idR ⊑ foldR F {A} (fun In)
+  idR-foldR-⊑ F (In x) (In .x) refl = (_ , (idR-mapFoldR-⊑ F F x x refl) , refl)
+
+  idR-mapFoldR-⊑ : (F G : PolyF) → ∀ {A} → idR ⊑ mapFoldR F G {A} (fun In)
+  idR-mapFoldR-⊑ F zer () ._ refl
+  idR-mapFoldR-⊑ F one tt .tt refl = Data.Unit.tt
+  idR-mapFoldR-⊑ F arg₁ (fst a) (fst .a) refl = refl
+  idR-mapFoldR-⊑ F arg₂ (snd x) (snd .x) refl = idR-foldR-⊑ F x x refl
+  idR-mapFoldR-⊑ F (G₀ ⊕ G₁) (inj₁ x) (inj₁ .x) refl = idR-mapFoldR-⊑ F G₀ x x refl
+  idR-mapFoldR-⊑ F (G₀ ⊕ G₁) (inj₂ y) (inj₂ .y) refl = idR-mapFoldR-⊑ F G₁ y y refl
+  idR-mapFoldR-⊑ F (G₀ ⊗ G₁) (x , y) (.x , .y) refl = (idR-mapFoldR-⊑ F G₀ x x refl , idR-mapFoldR-⊑ F G₁ y y refl)
+
+mutual
+  idR-foldR-⊒ : (F : PolyF) → ∀ {A} → idR ⊒ foldR F {A} (fun In)
+  idR-foldR-⊒ F (In y) (In x) (.y , mf , refl) with idR-mapFoldR-⊒ F F y x mf
+  idR-foldR-⊒ F (In x) (In .x) (.x , mf , refl) | refl = refl
+
+  idR-mapFoldR-⊒ : (F G : PolyF) → ∀ {A} → idR ⊒ mapFoldR F G {A} (fun In)
+  idR-mapFoldR-⊒ F zer () () _
+  idR-mapFoldR-⊒ F one tt tt _ = refl
+  idR-mapFoldR-⊒ F arg₁ (fst a) (fst .a) refl = refl
+  idR-mapFoldR-⊒ F arg₂ (snd y) (snd x) f with idR-foldR-⊒ F y x f
+  idR-mapFoldR-⊒ F arg₂ (snd y) (snd .y) f | refl = refl
+  idR-mapFoldR-⊒ F (G₀ ⊕ G₁) (inj₁ y₁) (inj₁ x₁) mf with idR-mapFoldR-⊒ F G₀ y₁ x₁ mf
+  idR-mapFoldR-⊒ F (G₀ ⊕ G₁) (inj₁ y₁) (inj₁ .y₁) mf | refl = refl
+  idR-mapFoldR-⊒ F (G₀ ⊕ G₁) (inj₁ y₁) (inj₂ x₂) ()
+  idR-mapFoldR-⊒ F (G₀ ⊕ G₁) (inj₂ y₂) (inj₁ x₁) ()
+  idR-mapFoldR-⊒ F (G₀ ⊕ G₁) (inj₂ y₂) (inj₂ x₂) mf with idR-mapFoldR-⊒ F G₁ y₂ x₂ mf
+  idR-mapFoldR-⊒ F (G₀ ⊕ G₁) (inj₂ y₂) (inj₂ .y₂) mf | refl = refl
+  idR-mapFoldR-⊒ F (G₀ ⊗ G₁) (y₁ , y₂) (x₁ , x₂) mf with idR-mapFoldR-⊒ F G₀ y₁ x₁ (proj₁ mf) | idR-mapFoldR-⊒ F G₁ y₂ x₂ (proj₂ mf)
+  idR-mapFoldR-⊒ F (G₀ ⊗ G₁) (y₁ , y₂) (.y₁ , .y₂) mf | refl | refl = refl
+
+
 -- Fusion Theorems
 
 foldR-fusion-⊒ : (F : PolyF) → {A B C : Set}
@@ -580,52 +615,83 @@ foldR-fusion-⊑ F S R T =
    ⇐∎
 
 
--- hylomorphisms
+-- hylomorphism are least prefix points
 
-least-prefix-point : (F : PolyF) → {A B C : Set}
-                   → (R : B ← ⟦ F ⟧ A B) → (S : C ← ⟦ F ⟧ A C) → (X : B ← C)
-                   → R ○ bimapR F idR X ○ (S ˘) ⊑ X
-                   → foldR F R ○ (foldR F S ˘) ⊑ X
-least-prefix-point F R S X =
-  ⇐-begin
-    foldR F R ○ (foldR F S ˘) ⊑ X
-  ⇐⟨ /-universal-⇒ ⟩
-    foldR F R ⊑ X / (foldR F S ˘)
-  ⇐⟨ foldR-universal-⇐-⊒ F (X / (foldR F S ˘)) R ⟩
-    R ○ bimapR F idR (X / (foldR F S ˘)) ⊑ (X / (foldR F S ˘)) ○ fun In
-  ⇐⟨ ⊑-trans id-elim-r ⟩
-    (R ○ bimapR F idR (X / (foldR F S ˘))) ○ idR ⊑ (X / (foldR F S ˘)) ○ fun In
-  ⇐⟨ ⊑-trans (○-monotonic-r fun-entire) ⟩
-    (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ○ (fun In) ⊑ (X / (foldR F S ˘)) ○ fun In
-  ⇐⟨ ⇦-mono-l (R ○ bimapR F idR (X / (foldR F S ˘)) ● (fun In ˘) ‥) ((X / (foldR F S ˘)) ‥) ⟩
-    (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ⊑ X / (foldR F S ˘)
-  ⇐⟨ /-universal-⇐ ⟩
-    ((R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘)) ○ (foldR F S ˘) ⊑ X
-  ⇐⟨ ⊑-trans ○-assocr ⟩
-    (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ○ (foldR F S ˘) ⊑ X
-  ⇐⟨ ⊑-trans (○-monotonic-r In˘FS˘⊑FS˘S˘) ⟩
-    (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
-  ⇐⟨ ⊑-trans ○-assocl ⟩
-    ((R ○ bimapR F idR (X / (foldR F S ˘))) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
-  ⇐⟨ ⊑-trans (○-monotonic-l ○-assocr) ⟩
-    (R ○ (bimapR F idR (X / (foldR F S ˘))) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
-  ⇐⟨ ⊑-trans (○-monotonic-l (⇦-mono-r (R ‥) (bimapR-functor-⊑ F))) ⟩
-    (R ○ bimapR F (idR ○ idR) (X / (foldR F S ˘) ○ (foldR F S ˘))) ○ (S ˘) ⊑ X
-  ⇐⟨ ⊑-trans (⇦-mono-l ((R ○ bimapR F (idR ○ idR) (X / (foldR F S ˘) ○ foldR F S ˘)) ‥) (R ● bimapR F idR X ‥) (○-monotonic-r (bimapR-monotonic-⊑ F id-idempotent-⊑ (/-universal-⇒ ⊑-refl)))) ⟩
-    R ○ bimapR F idR X ○ (S ˘) ⊑ X
-  ⇐∎
- where
-   In˘FS˘⊑FS˘S˘ : (fun In ˘) ○ (foldR F S ˘) ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
-   In˘FS˘⊑FS˘S˘ =
-     (⇐-begin
-        (fun In ˘) ○ (foldR F S ˘) ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
-      ⇐⟨ ⊑-trans (˘-○-distr-⊒ (foldR F S) (fun In)) ⟩
-        (foldR F S ○ fun In) ˘ ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
-      ⇐⟨ ⊒-trans (○-monotonic-l (bimapR-˘-preservation-⊑ F)) ⟩
-        (foldR F S ○ fun In) ˘ ⊑ (bimapR F idR (foldR F S) ˘) ○ (S ˘)
-      ⇐⟨ ⊒-trans (˘-○-distr-⊑ S (bimapR F idR (foldR F S))) ⟩
-        (foldR F S ○ fun In) ˘ ⊑ (S ○ bimapR F idR (foldR F S)) ˘
-      ⇐⟨ ˘-monotonic-⇒ ⟩
-        foldR F S ○ fun In ⊑ S ○ bimapR F idR (foldR F S)
-      ⇐∎) (foldR-computation-⊑ F S) 
+hylo-lpfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
+                        → LeastPrefixedPoint (_⊑_) (λ X → R ○ bimapR F idR X ○ (S ˘)) (foldR F R ○ (foldR F S ˘))
+hylo-lpfp {F = F} {R} {S} = (pfp , least)
+  where
+    pfp : R ○ bimapR F idR (foldR F R ○ (foldR F S ˘)) ○ (S ˘) ⊑ foldR F R ○ (foldR F S ˘)
+    pfp =
+      ⊑-begin
+        R ○ bimapR F idR (foldR F R ○ (foldR F S ˘)) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F id-idempotent-⊒ ⊑-refl)) ⟩
+        R ○ bimapR F (idR ○ idR) (foldR F R ○ (foldR F S ˘)) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-functor-⊒ F)) ⟩
+        R ○ (bimapR F idR (foldR F R) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r ○-assocr ⟩
+        R ○ bimapR F idR (foldR F R) ○ bimapR F idR (foldR F S ˘) ○ (S ˘)
+      ⊑⟨ ⇦-mono-l (R ● bimapR F idR (foldR F R) ‥) (foldR F R ● fun In ‥) (foldR-computation-⊒ F R) ⟩
+        foldR F R ○ fun In ○ bimapR F idR (foldR F S ˘) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r ˘-idempotent-⊒ ⟩
+        foldR F R ○ ((fun In ○ bimapR F idR (foldR F S ˘) ○ (S ˘)) ˘) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ ˘-○-distr3-⊑) ⟩
+        foldR F R ○ (((S ˘) ˘) ○ (bimapR F idR (foldR F S ˘) ˘) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-l ˘-idempotent-⊑)) ⟩
+        foldR F R ○ (S ○ (bimapR F idR (foldR F S ˘) ˘) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-r (○-monotonic-l (bimapR-˘-preservation-⊑ F)))) ⟩
+        foldR F R ○ (S ○ (bimapR F idR ((foldR F S ˘) ˘)) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F ⊑-refl ˘-idempotent-⊑)))) ⟩
+        foldR F R ○ (S ○ bimapR F idR (foldR F S) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (⇦-mono-l (S ● bimapR F idR (foldR F S) ‥) (foldR F S ● fun In ‥) (foldR-computation-⊒ F S))) ⟩
+        foldR F R ○ (foldR F S ○ (fun In) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-r fun-simple)) ⟩
+        foldR F R ○ (foldR F S ○ idR) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ id-intro-r) ⟩
+        foldR F R ○ (foldR F S ˘)
+      ⊑∎
+
+    least : ∀ {X} → R ○ bimapR F idR X ○ (S ˘) ⊑ X → foldR F R ○ (foldR F S ˘) ⊑ X
+    least {X} =
+      ⇐-begin
+        foldR F R ○ (foldR F S ˘) ⊑ X
+      ⇐⟨ /-universal-⇒ ⟩
+        foldR F R ⊑ X / (foldR F S ˘)
+      ⇐⟨ foldR-universal-⇐-⊒ F (X / (foldR F S ˘)) R ⟩
+        R ○ bimapR F idR (X / (foldR F S ˘)) ⊑ (X / (foldR F S ˘)) ○ fun In
+      ⇐⟨ ⊑-trans id-elim-r ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ idR ⊑ (X / (foldR F S ˘)) ○ fun In
+      ⇐⟨ ⊑-trans (○-monotonic-r fun-entire) ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ○ (fun In) ⊑ (X / (foldR F S ˘)) ○ fun In
+      ⇐⟨ ⇦-mono-l (R ○ bimapR F idR (X / (foldR F S ˘)) ● (fun In ˘) ‥) ((X / (foldR F S ˘)) ‥) ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ⊑ X / (foldR F S ˘)
+      ⇐⟨ /-universal-⇐ ⟩
+        ((R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘)) ○ (foldR F S ˘) ⊑ X
+      ⇐⟨ ⊑-trans ○-assocr ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ○ (foldR F S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (○-monotonic-r In˘FS˘⊑FS˘S˘) ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans ○-assocl ⟩
+        ((R ○ bimapR F idR (X / (foldR F S ˘))) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (○-monotonic-l ○-assocr) ⟩
+        (R ○ (bimapR F idR (X / (foldR F S ˘))) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (○-monotonic-l (⇦-mono-r (R ‥) (bimapR-functor-⊑ F))) ⟩
+        (R ○ bimapR F (idR ○ idR) (X / (foldR F S ˘) ○ (foldR F S ˘))) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (⇦-mono-l ((R ○ bimapR F (idR ○ idR) (X / (foldR F S ˘) ○ foldR F S ˘)) ‥) (R ● bimapR F idR X ‥) (○-monotonic-r (bimapR-monotonic-⊑ F id-idempotent-⊑ (/-universal-⇒ ⊑-refl)))) ⟩
+        R ○ bimapR F idR X ○ (S ˘) ⊑ X
+      ⇐∎
+     where
+       In˘FS˘⊑FS˘S˘ : (fun In ˘) ○ (foldR F S ˘) ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
+       In˘FS˘⊑FS˘S˘ =
+         (⇐-begin
+            (fun In ˘) ○ (foldR F S ˘) ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
+          ⇐⟨ ⊑-trans (˘-○-distr-⊒ (foldR F S) (fun In)) ⟩
+            (foldR F S ○ fun In) ˘ ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
+          ⇐⟨ ⊒-trans (○-monotonic-l (bimapR-˘-preservation-⊑ F)) ⟩
+            (foldR F S ○ fun In) ˘ ⊑ (bimapR F idR (foldR F S) ˘) ○ (S ˘)
+          ⇐⟨ ⊒-trans (˘-○-distr-⊑ S (bimapR F idR (foldR F S))) ⟩
+            (foldR F S ○ fun In) ˘ ⊑ (S ○ bimapR F idR (foldR F S)) ˘
+          ⇐⟨ ˘-monotonic-⇒ ⟩
+            foldR F S ○ fun In ⊑ S ○ bimapR F idR (foldR F S)
+          ⇐∎) (foldR-computation-⊑ F S) 
 
