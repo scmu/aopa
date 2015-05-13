@@ -126,72 +126,64 @@ foldR-↾-absorption F {S = S} {R} isPre SFR˘⊑R˘S =
          S ○ bimapR F idR (R ˘) ⊑ (R ˘) ○ S
        ⇐∎) SFR˘⊑R˘S
 
-greedy-theorem : {A B C : Set} {F : PolyF} {S : B ← ⟦ F ⟧ A B} {R : μ F A ← μ F A} {Q : ⟦ F ⟧ A B ← ⟦ F ⟧ A B}
+greedy-theorem : {A B C : Set} {F : PolyF} {S : C ← ⟦ F ⟧ A C} {T : B ← ⟦ F ⟧ A B} {R : C ← C} {Q : ⟦ F ⟧ A B ← ⟦ F ⟧ A B}
                → IsPreorder (_≡_) R
-               → fun In ○ bimapR F idR R ⊑ R ○ fun In
-               → fun In ○ bimapR F idR (foldR F S ˘) ○ (Q ⊓ (S ˘ ○ S)) ˘ ⊑ R ˘ ○ fun In ○ bimapR F idR (foldR F S ˘)
-               → (foldR F (((S ˘) ↾ Q) ˘) ˘) ⊑ (foldR F S ˘) ↾ R
-greedy-theorem {F = F}{S}{R}{Q} isPre mono greedy =
+               → S ○ S ˘ ⊑ idR
+               → S ○ bimapR F idR R ⊑ R ○ S
+               → S ○ bimapR F idR ((foldR F S) ○ (foldR F T ˘)) ○ (Q ⊓ (T ˘ ○ T)) ˘ ⊑ R ˘ ○ S ○ bimapR F idR ((foldR F S) ○ (foldR F T ˘))
+               → (foldR F S) ○ (foldR F (((T ˘) ↾ Q) ˘) ˘) ⊑ ((foldR F S) ○ (foldR F T ˘)) ↾ R
+greedy-theorem {F = F}{S}{T}{R}{Q} isPre S-simple mono greedy =
   (⇐-begin
-     (foldR F (((S ˘) ↾ Q) ˘) ˘) ⊑ (foldR F S ˘) ↾ R
-   ⇐⟨ ⊑-trans id-elim-l ⟩
-     idR ○ foldR F ((S ˘ ↾ Q) ˘) ˘ ⊑ foldR F S ˘ ↾ R
-   ⇐⟨ ⊑-trans (○-monotonic-l (idR-foldR-⊑ F)) ⟩
-     foldR F (fun In) ○ foldR F ((S ˘ ↾ Q) ˘) ˘ ⊑ foldR F S ˘ ↾ R
+     foldR F S ○ foldR F (((T ˘) ↾ Q) ˘) ˘ ⊑ ((foldR F S) ○ (foldR F T ˘)) ↾ R
    ⇐⟨ proj₂ hylo-lpfp ⟩
-     fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q) ⊑ foldR F S ˘ ↾ R
+     S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q) ⊑ ((foldR F S) ○ (foldR F T ˘)) ↾ R
    ⇐⟨ ↾-universal-⇐ ⟩
-    ((fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q) ⊑ foldR F S ˘) ×
-     ((fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)) ○ (foldR F S) ⊑ R))
+    ((S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q) ⊑ foldR F S ○ foldR F T ˘) ×
+     ((S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (foldR F S ○ foldR F T ˘) ˘ ⊑ R))
    ⇐∎) (pf₁ , pf₂)
  where
-   pf₁ : fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q) ⊑ foldR F S ˘
+   pf₁ : S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q) ⊑ foldR F S ○ foldR F T ˘
    pf₁ =
      ⊑-begin
-       fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q)
      ⊑⟨ ○-monotonic-r (○-monotonic-r (↾-universal-⇒₁ {S = Q} ⊑-refl)) ⟩
-       fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘)
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘)
      ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F ⊑-refl (↾-universal-⇒₁ {S = R} ⊑-refl))) ⟩
-       fun In ○ bimapR F idR (foldR F S ˘) ○ (S ˘)
-     ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F ⊑-refl id-elim-l)) ⟩
-        fun In ○ bimapR F idR (idR ○ foldR F S ˘) ○ (S ˘)
-     ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F ⊑-refl (○-monotonic-l (idR-foldR-⊑ F)))) ⟩
-       fun In ○ bimapR F idR (foldR F (fun In) ○ (foldR F S ˘)) ○ (S ˘)
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘)) ○ (T ˘)
      ⊑⟨ proj₁ hylo-lpfp ⟩
-       foldR F (fun In) ○ (foldR F S ˘)
-     ⊑⟨ ○-monotonic-l (idR-foldR-⊒ F) ⟩
-       idR ○ foldR F S ˘
-     ⊑⟨ id-intro-l ⟩
-       foldR F S ˘
+       foldR F S ○ foldR F T ˘
      ⊑∎
 
-   pf₂ : (fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)) ○ (foldR F S) ⊑ R
-   pf₂ =
+   pf₂ : (S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (foldR F S ○ foldR F T ˘) ˘ ⊑ R
+   pf₂ = 
      ⊑-begin
-       (fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)) ○ (foldR F S)
-     ⊑⟨ ○-monotonic-r id-elim-r ⟩
-       (fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)) ○ (foldR F S ○ idR)
-     ⊑⟨ ○-monotonic-r (○-monotonic-r idR⊑InIn˘) ⟩
-       (fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)) ○ (foldR F S ○ fun In ○ (fun In ˘))
-     ⊑⟨ ○-monotonic-r (⇦-mono-l (foldR F S ● fun In ‥) (S ● bimapR F idR (foldR F S) ‥) (foldR-computation-⊑ F S)) ⟩
-       (fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)) ○ (S ○ bimapR F idR (foldR F S) ○ (fun In ˘))
+       (S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (foldR F S ○ foldR F T ˘) ˘
+     ⊑⟨ ○-monotonic-r (˘-○-distr-⊑ (foldR F S) (foldR F T ˘)) ⟩
+       (S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (foldR F T ○ foldR F S ˘)
+     ⊑⟨ ○-monotonic-r (proj₂ (proj₁ hylo-lfp)) ⟩
+       (S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (T ○ bimapR F idR (foldR F T ○ foldR F S ˘) ○ (S ˘))
      ⊑⟨ ○-assocr ⟩
-       fun In ○ (bimapR F idR (foldR F S ˘ ↾ R) ○ (S ˘ ↾ Q)) ○ S ○ bimapR F idR (foldR F S) ○ (fun In ˘)
+       S ○ (bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (T ○ bimapR F idR (foldR F T ○ foldR F S ˘) ○ (S ˘))
      ⊑⟨ ○-monotonic-r ○-assocr ⟩
-       fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ ((S ˘) ⊓ (Q / S)) ○ S ○ bimapR F idR (foldR F S) ○ (fun In ˘)
-     ⊑⟨ ⇦-mono (fun In ● bimapR F idR (foldR F S ˘ ↾ R) ‥) ((S ˘) ⊓ (Q / S) ● S ‥) (((S ˘ ○ S) ⊓ (Q / S ○ S)) ‥) ○-⊓-distr-r ⟩
-       fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (((S ˘) ○ S) ⊓ ((Q / S) ○ S)) ○ bimapR F idR (foldR F S) ○ (fun In ˘)
-     ⊑⟨ ⇦-mono (fun In ● bimapR F idR (foldR F S ˘ ↾ R) ‥) (((S ˘ ○ S) ⊓ (Q / S ○ S)) ‥) (((S ˘ ○ S) ⊓ Q) ‥) (⊓-monotonic ⊑-refl (/-universal-⇒ ⊑-refl)) ⟩
-       fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ (((S ˘) ○ S) ⊓ Q) ○ bimapR F idR (foldR F S) ○ (fun In ˘)
-     ⊑⟨ ⇦-mono-r (fun In ● bimapR F idR (foldR F S ˘ ↾ R) ‥) greedy-˘ ⟩
-       fun In ○ bimapR F idR (foldR F S ˘ ↾ R) ○ bimapR F idR (foldR F S) ○ (fun In ˘) ○ R
-     ⊑⟨ ⇦-mono (fun In ‥) (bimapR F idR (foldR F S ˘ ↾ R) ● bimapR F idR (foldR F S) ‥) (bimapR F (idR ○ idR) ((foldR F S ˘ ↾ R) ○ foldR F S) ‥) (bimapR-functor-⊑ F) ⟩
-       fun In ○ (bimapR F (idR ○ idR) ((foldR F S ˘ ↾ R) ○ foldR F S)) ○ (fun In ˘) ○ R
-     ⊑⟨ ⇦-mono (fun In ‥) (bimapR F (idR ○ idR) ((foldR F S ˘ ↾ R) ○ foldR F S) ‥) (bimapR F idR R ‥) (bimapR-monotonic-⊑ F id-idempotent-⊑ (↾-universal-⇒₂ ⊑-refl)) ⟩
-       fun In ○ bimapR F idR R ○ (fun In ˘) ○ R
-     ⊑⟨ ⇦-mono-l (fun In ● bimapR F idR R ‥) (R ● fun In ‥) mono ⟩
-       R ○ fun In ○ fun In ˘ ○ R
-     ⊑⟨ ⇦-mono (R ‥) (fun In ● (fun In ˘) ‥) (idR ‥) fun-simple ⟩
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ ((T ˘) ⊓ (Q / T)) ○ T ○ bimapR F idR (foldR F T ○ foldR F S ˘) ○ (S ˘)
+     ⊑⟨ ⇦-mono (S ● bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ‥) ((T ˘) ⊓ (Q / T) ● T ‥) (((T ˘ ○ T) ⊓ (Q / T ○ T)) ‥) ○-⊓-distr-r ⟩
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (((T ˘) ○ T) ⊓ ((Q / T) ○ T)) ○ bimapR F idR (foldR F T ○ foldR F S ˘) ○ (S ˘)
+     ⊑⟨ ⇦-mono (S ● bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ‥) (((T ˘ ○ T) ⊓ (Q / T ○ T)) ‥) (((T ˘ ○ T) ⊓ Q) ‥) (⊓-monotonic ⊑-refl (/-universal-⇒ ⊑-refl)) ⟩
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (((T ˘) ○ T) ⊓ Q) ○ bimapR F idR (foldR F T ○ foldR F S ˘) ○ (S ˘)
+     ⊑⟨ ○-monotonic-r (○-monotonic-r (○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F ⊑-refl (˘-○-distr-⊒ (foldR F S) (foldR F T ˘)))))) ⟩
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ (((T ˘) ○ T) ⊓ Q) ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘)
+     ⊑⟨ ○-monotonic-r (○-monotonic-r greedy-˘) ⟩
+       S ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ↾ R) ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ○ R
+     ⊑⟨ ⇦-mono (S ‥) (bimapR F idR (foldR F S ○ foldR F T ˘ ↾ R) ●
+                        bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ‥)
+                     (bimapR F (idR ○ idR)
+                       ((foldR F S ○ foldR F T ˘ ↾ R) ○ (foldR F S ○ foldR F T ˘) ˘) ‥) (bimapR-functor-⊑ F) ⟩
+       S ○ bimapR F (idR ○ idR) (((foldR F S ○ foldR F T ˘) ↾ R) ○ ((foldR F S ○ foldR F T ˘) ˘)) ○ (S ˘) ○ R
+     ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F id-idempotent-⊑ (↾-universal-⇒₂ ⊑-refl))) ⟩
+       S ○ bimapR F idR R ○ (S ˘) ○ R
+     ⊑⟨ ⇦-mono-l (S ● bimapR F idR R ‥) (R ● S ‥) mono ⟩
+       R ○ S ○ S ˘ ○ R
+     ⊑⟨ ⇦-mono (R ‥) (S ● (S ˘) ‥) (idR ‥) S-simple ⟩
        R ○ idR ○ R
      ⊑⟨ ○-monotonic-r id-intro-l ⟩
        R ○ R
@@ -199,23 +191,20 @@ greedy-theorem {F = F}{S}{R}{Q} isPre mono greedy =
        R
      ⊑∎
     where
-      idR⊑InIn˘ : idR ⊑ fun In ○ fun In ˘
-      idR⊑InIn˘ .(In x) (In x) refl = (x , refl , refl)
-      
-      greedy-˘ : (S ˘ ○ S) ⊓ Q ○ bimapR F idR (foldR F S) ○ (fun In ˘) ⊑ bimapR F idR (foldR F S) ○ (fun In ˘) ○ R
+      greedy-˘ : (T ˘ ○ T) ⊓ Q ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ⊑ bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ○ R
       greedy-˘ =
         (⇐-begin
-           (S ˘ ○ S) ⊓ Q ○ bimapR F idR (foldR F S) ○ (fun In ˘) ⊑ bimapR F idR (foldR F S) ○ (fun In ˘) ○ R
+           (T ˘ ○ T) ⊓ Q ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ⊑ bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ○ R
          ⇐⟨ ˘-universal-⇐ ⟩
-           ((S ˘ ○ S) ⊓ Q ○ bimapR F idR (foldR F S) ○ (fun In ˘)) ˘ ⊑ (bimapR F idR (foldR F S) ○ (fun In ˘) ○ R) ˘
+           ((T ˘ ○ T) ⊓ Q ○ bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘)) ˘ ⊑ (bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ○ R) ˘
          ⇐⟨ ⊑-trans ˘-○-distr3-⊑ ⟩
-           fun In ○ (bimapR F idR (foldR F S) ˘) ○ ((S ˘ ○ S) ⊓ Q) ˘ ⊑ (bimapR F idR (foldR F S) ○ (fun In ˘) ○ R) ˘
-         ⇐⟨ ⊒-trans (˘-○-distr3-⊒ (bimapR F idR (foldR F S)) (fun In ˘) R) ⟩
-           fun In ○ (bimapR F idR (foldR F S) ˘) ○ ((S ˘ ○ S) ⊓ Q) ˘ ⊑ R ˘ ○ fun In ○ (bimapR F idR (foldR F S) ˘)
+           S ○ (bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ (bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ○ R) ˘
          ⇐⟨ ⊑-trans (○-monotonic-r (○-monotonic-l (bimapR-˘-preservation-⊑ F))) ⟩
-           fun In ○ bimapR F idR (foldR F S ˘) ○ ((S ˘ ○ S) ⊓ Q) ˘ ⊑ R ˘ ○ fun In ○ bimapR F idR (foldR F S) ˘
+           S ○ bimapR F idR (foldR F S ○ foldR F T ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ (bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ○ (S ˘) ○ R) ˘
+         ⇐⟨ ⊒-trans (˘-○-distr3-⊒ (bimapR F idR ((foldR F S ○ foldR F T ˘) ˘)) (S ˘) R) ⟩
+           S ○ bimapR F idR (foldR F S ○ foldR F T ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ R ˘ ○ S ○ (bimapR F idR ((foldR F S ○ foldR F T ˘) ˘) ˘)
          ⇐⟨ ⊒-trans (○-monotonic-r (○-monotonic-r (bimapR-˘-preservation-⊒ F))) ⟩
-           fun In ○ bimapR F idR (foldR F S ˘) ○ ((S ˘ ○ S) ⊓ Q) ˘ ⊑ R ˘ ○ fun In ○ bimapR F idR (foldR F S ˘)
+           S ○ bimapR F idR (foldR F S ○ foldR F T ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ R ˘ ○ S ○ bimapR F idR (foldR F S ○ foldR F T ˘)
          ⇐⟨ ⊑-trans (○-monotonic-r (○-monotonic-r ⊓-commute)) ⟩
-           fun In ○ bimapR F idR (foldR F S ˘) ○ (Q ⊓ (S ˘ ○ S)) ˘ ⊑ R ˘ ○ fun In ○ bimapR F idR (foldR F S ˘)
+           S ○ bimapR F idR (foldR F S ○ foldR F T ˘) ○ (Q ⊓ (T ˘ ○ T)) ˘ ⊑ R ˘ ○ S ○ bimapR F idR (foldR F S ○ foldR F T ˘)
          ⇐∎) greedy

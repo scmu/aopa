@@ -13,6 +13,7 @@ open import Relations.Factor
 open import Relations.Function
 open import Relations.Converse
 open import Relations.CompChain
+open import Relations.Poset
 open import FixedPoint
 open import AlgebraicReasoning.ExtensionalEquality 
             using (_≐_; ≐-refl; ≐-sym; ≐-trans; ≐-trans'; 
@@ -616,9 +617,8 @@ foldR-fusion-⊑ F S R T =
 
 
 -- hylomorphism are least prefix points
-
 hylo-lpfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
-                        → LeastPrefixedPoint (_⊑_) (λ X → R ○ bimapR F idR X ○ (S ˘)) (foldR F R ○ (foldR F S ˘))
+          → LeastPrefixedPoint (_⊑_) (λ X → R ○ bimapR F idR X ○ (S ˘)) (foldR F R ○ (foldR F S ˘))
 hylo-lpfp {F = F} {R} {S} = (pfp , least)
   where
     pfp : R ○ bimapR F idR (foldR F R ○ (foldR F S ˘)) ○ (S ˘) ⊑ foldR F R ○ (foldR F S ˘)
@@ -695,3 +695,6 @@ hylo-lpfp {F = F} {R} {S} = (pfp , least)
             foldR F S ○ fun In ⊑ S ○ bimapR F idR (foldR F S)
           ⇐∎) (foldR-computation-⊑ F S) 
 
+hylo-lfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
+          → LeastFixedPoint (_≑_) (_⊑_) (λ X → R ○ bimapR F idR X ○ (S ˘)) (foldR F R ○ (foldR F S ˘))
+hylo-lfp = lpfp⇒lfp _≑_ _⊑_ ⊑-isPartialOrder _ (λ x⊑y → ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ _ ⊑-refl x⊑y))) _ hylo-lpfp
