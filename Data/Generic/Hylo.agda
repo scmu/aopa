@@ -8,44 +8,103 @@ open import Data.Product using (Σ; ∃; _×_; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import Relations
+open import Relations.Converse
+open import Relations.Function
+open import Relations.Factor
+open import Relations.CompChain
 open import Relations.WellFound
+open import Relations.Poset
+open import FixedPoint
+open import AlgebraicReasoning.Implications
+open import AlgebraicReasoning.Relations
 
-open import Data.Generic
-
-
--- membership relation defined for polynomial functors
-
-ε : (F : PolyF) → ∀ {i} {A : Set i} {X : Set} → (X ← ⟦ F ⟧ A X ⊣ zero)
-ε zer _ _ = ⊥
-ε one _ _ = ⊥
-ε arg₁ _ _ = ⊥
-ε arg₂ x₀ (snd x₁) = x₀ ≡ x₁
-ε (F₀ ⊕ F₁) x (inj₁ y) = ε F₀ x y
-ε (F₀ ⊕ F₁) x (inj₂ y) = ε F₁ x y
-ε (F₀ ⊗ F₁) x (y₀ , y₁) = ε F₀ x y₀ ⊎ ε F₁ x y₁
-
-data Path (F : PolyF) {i : Level} {A : Set i} {X : Set} (x : ⟦ F ⟧ A X) :
-          (G : PolyF) → ⟦ G ⟧ A X → Set i where
-  root : Path F x F x
-  inj₁  : ∀ {G₁ G₂ y} → Path F x (G₁ ⊕ G₂) (inj₁ y) → Path F x G₁ y
-  inj₂  : ∀ {G₁ G₂ y} → Path F x (G₁ ⊕ G₂) (inj₂ y) → Path F x G₂ y
-  out₁ : ∀ {G₁ G₂ y₁ y₂} → Path F x (G₁ ⊗ G₂) (y₁ , y₂) → Path F x G₁ y₁
-  out₂ : ∀ {G₁ G₂ y₁ y₂} → Path F x (G₁ ⊗ G₂) (y₁ , y₂) → Path F x G₂ y₂
+open import Data.Generic.Core
+open import Data.Generic.Membership
+open import Data.Generic.Fold
 
 
-path-to-ε' : ∀ {F G} {i}  {A : Set i} {X : Set} {x : ⟦ F ⟧ A X} {y : ⟦ G ⟧ A X}
-             → Path F x G y
-             → {z : X} → ε G z y
-             → ε F z x
-path-to-ε' root z∈ = z∈
-path-to-ε' (inj₁ p) z∈ = path-to-ε' p z∈
-path-to-ε' (inj₂ p) z∈ = path-to-ε' p z∈
-path-to-ε' (out₁ p) z∈ = path-to-ε' p (inj₁ z∈)
-path-to-ε' (out₂ p) z∈ = path-to-ε' p (inj₂ z∈)
+hylo-lpfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
+          → LeastPrefixedPoint (_⊑_) (λ X → R ○ bimapR F idR X ○ (S ˘)) (foldR F R ○ (foldR F S ˘))
+hylo-lpfp {F = F} {R} {S} = (pfp , least)
+  where
+    pfp : R ○ bimapR F idR (foldR F R ○ (foldR F S ˘)) ○ (S ˘) ⊑ foldR F R ○ (foldR F S ˘)
+    pfp =
+      ⊑-begin
+        R ○ bimapR F idR (foldR F R ○ (foldR F S ˘)) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F id-idempotent-⊒ ⊑-refl)) ⟩
+        R ○ bimapR F (idR ○ idR) (foldR F R ○ (foldR F S ˘)) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-functor-⊒ F)) ⟩
+        R ○ (bimapR F idR (foldR F R) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r ○-assocr ⟩
+        R ○ bimapR F idR (foldR F R) ○ bimapR F idR (foldR F S ˘) ○ (S ˘)
+      ⊑⟨ ⇦-mono-l (R ● bimapR F idR (foldR F R) ‥) (foldR F R ● fun In ‥) (foldR-computation-⊒ F R) ⟩
+        foldR F R ○ fun In ○ bimapR F idR (foldR F S ˘) ○ (S ˘)
+      ⊑⟨ ○-monotonic-r ˘-idempotent-⊒ ⟩
+        foldR F R ○ ((fun In ○ bimapR F idR (foldR F S ˘) ○ (S ˘)) ˘) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ ˘-○-distr3-⊑) ⟩
+        foldR F R ○ (((S ˘) ˘) ○ (bimapR F idR (foldR F S ˘) ˘) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-l ˘-idempotent-⊑)) ⟩
+        foldR F R ○ (S ○ (bimapR F idR (foldR F S ˘) ˘) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-r (○-monotonic-l (bimapR-˘-preservation-⊑ F)))) ⟩
+        foldR F R ○ (S ○ (bimapR F idR ((foldR F S ˘) ˘)) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F ⊑-refl ˘-idempotent-⊑)))) ⟩
+        foldR F R ○ (S ○ bimapR F idR (foldR F S) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (⇦-mono-l (S ● bimapR F idR (foldR F S) ‥) (foldR F S ● fun In ‥) (foldR-computation-⊒ F S))) ⟩
+        foldR F R ○ (foldR F S ○ (fun In) ○ (fun In ˘)) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ (○-monotonic-r fun-simple)) ⟩
+        foldR F R ○ (foldR F S ○ idR) ˘
+      ⊑⟨ ○-monotonic-r (˘-monotonic-⇐ id-intro-r) ⟩
+        foldR F R ○ (foldR F S ˘)
+      ⊑∎
 
-path-to-ε : ∀ {F} {i}  {A : Set i} {X : Set} {x : ⟦ F ⟧ A X} {y : X}
-             → Path F x arg₂ (snd y) → ε F y x
-path-to-ε p = path-to-ε' p refl
+    least : ∀ {X} → R ○ bimapR F idR X ○ (S ˘) ⊑ X → foldR F R ○ (foldR F S ˘) ⊑ X
+    least {X} =
+      ⇐-begin
+        foldR F R ○ (foldR F S ˘) ⊑ X
+      ⇐⟨ /-universal-⇒ ⟩
+        foldR F R ⊑ X / (foldR F S ˘)
+      ⇐⟨ foldR-universal-⇐-⊒ F (X / (foldR F S ˘)) R ⟩
+        R ○ bimapR F idR (X / (foldR F S ˘)) ⊑ (X / (foldR F S ˘)) ○ fun In
+      ⇐⟨ ⊑-trans id-elim-r ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ idR ⊑ (X / (foldR F S ˘)) ○ fun In
+      ⇐⟨ ⊑-trans (○-monotonic-r fun-entire) ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ○ (fun In) ⊑ (X / (foldR F S ˘)) ○ fun In
+      ⇐⟨ ⇦-mono-l (R ○ bimapR F idR (X / (foldR F S ˘)) ● (fun In ˘) ‥) ((X / (foldR F S ˘)) ‥) ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ⊑ X / (foldR F S ˘)
+      ⇐⟨ /-universal-⇐ ⟩
+        ((R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘)) ○ (foldR F S ˘) ⊑ X
+      ⇐⟨ ⊑-trans ○-assocr ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (fun In ˘) ○ (foldR F S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (○-monotonic-r In˘FS˘⊑FS˘S˘) ⟩
+        (R ○ bimapR F idR (X / (foldR F S ˘))) ○ (bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans ○-assocl ⟩
+        ((R ○ bimapR F idR (X / (foldR F S ˘))) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (○-monotonic-l ○-assocr) ⟩
+        (R ○ (bimapR F idR (X / (foldR F S ˘))) ○ bimapR F idR (foldR F S ˘)) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (○-monotonic-l (⇦-mono-r (R ‥) (bimapR-functor-⊑ F))) ⟩
+        (R ○ bimapR F (idR ○ idR) (X / (foldR F S ˘) ○ (foldR F S ˘))) ○ (S ˘) ⊑ X
+      ⇐⟨ ⊑-trans (⇦-mono-l ((R ○ bimapR F (idR ○ idR) (X / (foldR F S ˘) ○ foldR F S ˘)) ‥) (R ● bimapR F idR X ‥) (○-monotonic-r (bimapR-monotonic-⊑ F id-idempotent-⊑ (/-universal-⇒ ⊑-refl)))) ⟩
+        R ○ bimapR F idR X ○ (S ˘) ⊑ X
+      ⇐∎
+     where
+       In˘FS˘⊑FS˘S˘ : (fun In ˘) ○ (foldR F S ˘) ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
+       In˘FS˘⊑FS˘S˘ =
+         (⇐-begin
+            (fun In ˘) ○ (foldR F S ˘) ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
+          ⇐⟨ ⊑-trans (˘-○-distr-⊒ (foldR F S) (fun In)) ⟩
+            (foldR F S ○ fun In) ˘ ⊑ (bimapR F idR (foldR F S ˘)) ○ (S ˘)
+          ⇐⟨ ⊒-trans (○-monotonic-l (bimapR-˘-preservation-⊑ F)) ⟩
+            (foldR F S ○ fun In) ˘ ⊑ (bimapR F idR (foldR F S) ˘) ○ (S ˘)
+          ⇐⟨ ⊒-trans (˘-○-distr-⊑ S (bimapR F idR (foldR F S))) ⟩
+            (foldR F S ○ fun In) ˘ ⊑ (S ○ bimapR F idR (foldR F S)) ˘
+          ⇐⟨ ˘-monotonic-⇒ ⟩
+            foldR F S ○ fun In ⊑ S ○ bimapR F idR (foldR F S)
+          ⇐∎) (foldR-computation-⊑ F S) 
+
+hylo-lfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
+          → LeastFixedPoint (_≑_) (_⊑_) (λ X → R ○ bimapR F idR X ○ (S ˘)) (foldR F R ○ (foldR F S ˘))
+hylo-lfp = lpfp⇒lfp _≑_ _⊑_ ⊑-isPartialOrder _ (λ x⊑y → ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ _ ⊑-refl x⊑y))) _ hylo-lpfp
+
 
 mutual
  hylo-acc : (F : PolyF) → ∀ {j} {A : Set} {B : Set j} {C : Set}
