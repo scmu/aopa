@@ -26,6 +26,8 @@ _↾_ : ∀ {i j} {A : Set i} {B : Set j}
       → (A ← B ⊣ (i ⊔ℓ j))
 S ↾ R = S ⊓ (R / S ˘)
 
+-- Universal properties.
+
 ↾-universal-⇒₁ : ∀ {i j} {A : Set i} {B : Set j}
                  → {X S : A ← B} {R : A ← A}
                  → X ⊑ S ↾ R 
@@ -72,6 +74,8 @@ S ↾ R = S ⊓ (R / S ˘)
                 ((X ⊑ S) × (X ○ S ˘ ⊑ R))
 ↾-universal {R = R} = ↾-universal-⇒ , ↾-universal-⇐
 
+-- Derived inclusion properties.
+
 S↾R⊑S : ∀ {i j} {A : Set i} {B : Set j}
         → {S : A ← B} {R : A ← A}
         → S ↾ R ⊑ S
@@ -82,19 +86,7 @@ S↾RS˘⊑R : ∀ {i j} {A : Set i} {B : Set j}
         → (S ↾ R) ○ S ˘ ⊑ R 
 S↾RS˘⊑R = ↾-universal-⇒₂ ⊑-refl
 
-galois-shrink : ∀ {i} {A B : Set i}
-         → (f : A → B) (g : B → A)
-         → (R : B ← B ⊣ i) (S : A ← A ⊣ i)
-         → IsPreorder (_≡_) S
-         → galois f g R S
-         → fun g ⊑ ((fun f)˘ ○ R) ↾ (S ˘)
-galois-shrink f g R S isPre gal = ↾-universal-⇐ (g⊑f˘R , gR˘f⊑S˘)
-  where g⊑f˘R : fun g ⊑ (fun f ˘ ○ R)
-        g⊑f˘R = galois-easy-⇒ {S = S} isPre gal
-
-        gR˘f⊑S˘ : fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘ 
-        gR˘f⊑S˘ = galois-hard-⇒ gal
-
+-- Absorption rule.
 
 ↾-simple-absorption : ∀ {i} {A : Set i} {B : Set i} {C : Set i}
    → (S : A ← B) (T : B ← C) (R : A ← A)
@@ -127,3 +119,66 @@ galois-shrink f g R S isPre gal = ↾-universal-⇐ (g⊑f˘R , gR˘f⊑S˘)
    → (S : A ← B) (f : C → B) (R : A ← A)
    → (S ↾ R) ○ fun f ⊑ (S ○ fun f) ↾ R
 ↾-fun-absorption S f R = ↾-simple-absorption S (fun f) R fun-simple
+
+-- Monotonicity.
+
+-- Certainly, if the ordering is more "liberal", a shrunk relation
+-- is allowed to return more.
+
+↾-ord-monotonic :  ∀ {i j} {A : Set i} {B : Set j} 
+   → (S : A ← B) (R T : A ← A)
+   → (R ⊑ T) 
+   → S ↾ R ⊑ S ↾ T
+↾-ord-monotonic S R T R⊑T = ↾-universal-⇐ (S↾R⊑S , S↾RS˘⊑T)   
+  where S↾RS˘⊑T : (S ↾ R) ○ S ˘ ⊑ T
+        S↾RS˘⊑T = ⊑-begin
+                    (S ↾ R) ○ S ˘
+                  ⊑⟨ S↾RS˘⊑R ⟩
+                    R
+                  ⊑⟨ R⊑T ⟩
+                    T
+                  ⊑∎
+
+-- In general, S ↾ R is not monotonic in S --- 
+-- with S ⊑ T, it is not always the case that S ↾ R ⊑ T ↾ R.
+-- One situation where the latter holds is when T does not
+-- introduce solutions "better" than those given by S. That is,  
+-- when S ○ T ˘ ⊑ R.
+
+↾-gen-monotonic :  ∀ {i} {A : Set i} {B : Set i} {C : Set i}
+   → (S T : A ← B) (R : A ← A)
+   → (S ⊑ T) → S ○ T ˘ ⊑ R
+   → S ↾ R ⊑ T ↾ R
+↾-gen-monotonic S T R S⊑T ST˘⊑R = ↾-universal-⇐ (S↾R⊑T , S↾RT˘⊑R)   
+  where S↾R⊑T : S ↾ R ⊑ T
+        S↾R⊑T = ⊑-begin
+                  S ↾ R
+                ⊑⟨ S↾R⊑S ⟩
+                  S
+                ⊑⟨ S⊑T ⟩
+                  T
+                ⊑∎
+        
+        S↾RT˘⊑R : (S ↾ R) ○ T ˘ ⊑ R
+        S↾RT˘⊑R = (⇐-begin 
+                    (S ↾ R) ○ T ˘ ⊑ R
+                   ⇐⟨ ⊒-trans ST˘⊑R ⟩
+                    (S ↾ R) ○ T ˘ ⊑ S ○ T ˘
+                   ⇐⟨ ○-monotonic-l ⟩
+                    S ↾ R ⊑ S
+                   ⇐∎ ) S↾R⊑S
+
+-- Relationship to Galois connection.
+
+galois-shrink : ∀ {i} {A B : Set i}
+         → (f : A → B) (g : B → A)
+         → (R : B ← B ⊣ i) (S : A ← A ⊣ i)
+         → IsPreorder (_≡_) S
+         → galois f g R S
+         → fun g ⊑ ((fun f)˘ ○ R) ↾ (S ˘)
+galois-shrink f g R S isPre gal = ↾-universal-⇐ (g⊑f˘R , gR˘f⊑S˘)
+  where g⊑f˘R : fun g ⊑ (fun f ˘ ○ R)
+        g⊑f˘R = galois-easy-⇒ {S = S} isPre gal
+
+        gR˘f⊑S˘ : fun g ○ ((fun f ˘ ○ R)) ˘ ⊑ S ˘ 
+        gR˘f⊑S˘ = galois-hard-⇒ gal
