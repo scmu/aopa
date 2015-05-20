@@ -83,6 +83,10 @@ bimapR (F₁ ⊕ F₂) R S (inj₂ y₁) (inj₁ x₂) = ⊥
 bimapR (F₁ ⊕ F₂) R S (inj₂ y₁) (inj₂ y₂) = bimapR F₂ R S y₁ y₂
 bimapR (F₁ ⊗ F₂) R S (x₁ , y₁) (x₂ , y₂) = bimapR F₁ R S x₁ x₂ × bimapR F₂ R S y₁ y₂
 
+fmapR : (F : PolyF) → ∀ {k l} {A : Set} {B₁ : Set k} {B₂ : Set l}
+      → (B₂ ← B₁ ⊣ zero) → (⟦ F ⟧ A B₂ ← ⟦ F ⟧ A B₁ ⊣ zero)
+fmapR F R = bimapR F idR R
+
 bimapR-functor-⊑ : (F : PolyF) → ∀ {i j k l} {A₁ : Set i} {A₂ : Set} {A₃ : Set j} {B₁ : Set k} {B₂ : Set} {B₃ : Set l}
                    {R : A₃ ← A₂} {S : B₃ ← B₂} {T : A₂ ← A₁} {U : B₂ ← B₁}
                   → bimapR F R S ○ bimapR F T U ⊑ bimapR F (R ○ T) (S ○ U)
