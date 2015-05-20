@@ -32,8 +32,14 @@ data One {i} : Set i where
 data Fst {i j} (A : Set i) : Set (i ⊔ℓ j) where
   fst : A → Fst {i} {j} A
 
+unfst : ∀ {i j} {A : Set i} → Fst {i} {j} A → A
+unfst (fst x) = x
+
 data Snd {i j} (X : Set j) : Set (i ⊔ℓ j) where
   snd : X → Snd {i} {j} X
+
+unsnd : ∀ {i j} {X : Set j} → Snd {i} {j} X → X
+unsnd (snd x) = x
 
 ⟦_⟧ : PolyF → ∀{i j} → (A : Set i) (X : Set j) → Set (i ⊔ℓ j)
 ⟦ zer ⟧ A X = Zero

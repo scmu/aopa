@@ -283,3 +283,7 @@ infixr 2 _⨉_
 _⨉_ : ∀ {i j k l m n} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
      → (B ← A ⊣ m) → (D ← C ⊣ n) → ((B × D) ← (A × C)) 
 (R ⨉ S) (b , d) (a , c) = (R b a × S d c)
+
+⟨_,_⟩ : ∀ {i j k m n} {A : Set i} {B : Set j} {C : Set k}
+     → (B ← A ⊣ m) → (C ← A ⊣ n) → ((B × C) ← A)
+⟨ R , S ⟩ (b , c) a = (R b a × S c a)      
