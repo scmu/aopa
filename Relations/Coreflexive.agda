@@ -10,7 +10,7 @@ open import Relations
 _¿ : ∀ {i} {A : Set i} → ℙ A → (A ← A)
 (p ¿) b a = (a ≡ b) × p a
 
-set-corefl⊑idR : {A : Set} → (s : ℙ A) → s ¿ ⊑ idR
+set-corefl⊑idR : ∀ {i} {A : Set i} → (s : ℙ A) → s ¿ ⊑ idR
 set-corefl⊑idR s b a (a≡b , bRa) = a≡b
 
 -- coreflexives are idempotent: C ○ C ≑ C
@@ -23,8 +23,33 @@ corefl-idempotent-⊑ : ∀ {i} {A : Set i} {C : A ← A} → C ⊑ idR → C �
 corefl-idempotent-⊑ C⊑idR y x (z , zCx , yCz) with C⊑idR z x zCx | C⊑idR y z yCz
 corefl-idempotent-⊑ C⊑idR x .x (.x , xCx , xCx') | refl | refl = xCx
 
+corefl-intro-r : ∀ {i j} {A : Set i} {B : Set j} {C : A ← A} {R : B ← A ⊣ i}
+               → C ⊑ idR → R ○ C ⊑ R
+corefl-intro-r {C = C} {R} C⊑idR =
+  ⊑-begin
+    R ○ C
+  ⊑⟨ ○-monotonic-r C⊑idR ⟩
+    R ○ idR
+  ⊑⟨ id-intro-r ⟩
+    R
+  ⊑∎
+ where open import AlgebraicReasoning.Relations
+
+corefl-intro-l : ∀ {i j} {A : Set i} {B : Set j} {C : B ← B} {R : B ← A ⊣ j}
+               → C ⊑ idR → C ○ R ⊑ R
+corefl-intro-l {C = C} {R} C⊑idR =
+  ⊑-begin
+    C ○ R 
+  ⊑⟨ ○-monotonic-l C⊑idR ⟩
+    idR ○ R
+  ⊑⟨ id-intro-l ⟩
+    R
+  ⊑∎
+ where open import AlgebraicReasoning.Relations
+
 open import Data.List using (List)
 open import Data.List.Utilities using (check; corefl-check)
+
 check-idempotent : ∀ {A : Set} → (p : ℙ (A × List A)) → 
                    check (p ¿) ○ check (p ¿) ⊒ check (p ¿)
 check-idempotent p = corefl-idempotent-⊒ (corefl-check (set-corefl⊑idR p))
