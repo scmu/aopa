@@ -42,7 +42,7 @@ ran-cancellation R = ran-universal-⇒ R (ran R) ⊆-refl
                  
 -- monotype factor.
 
-_⍀_ : ∀ {i} {A B : Set i}
+_⍀_ : ∀ {i}{A B : Set i}
       → (B ← A ⊣ i) → ℙ B → ℙ A
 (R ⍀ P) a = ∀ b → R b a → P b
 
@@ -101,3 +101,4 @@ _⋱_ : ∀ {i} {A B : Set i}
                 → (R S : B ← A ⊣ i) 
                 → R ○ (R ⋱ S) ¿ ⊑ S
 ⋱-cancellation R S = ⋱-universal-⇒ (R ⋱ S) R S ⊆-refl
+

@@ -23,6 +23,9 @@ corefl-idempotent-⊑ : ∀ {i} {A : Set i} {C : A ← A} → C ⊑ idR → C �
 corefl-idempotent-⊑ C⊑idR y x (z , zCx , yCz) with C⊑idR z x zCx | C⊑idR y z yCz
 corefl-idempotent-⊑ C⊑idR x .x (.x , xCx , xCx') | refl | refl = xCx
 
+-- Introducing a coreflexive relation. Sometimes
+-- help to shorten the proof.
+
 corefl-intro-r : ∀ {i j} {A : Set i} {B : Set j} {C : A ← A} {R : B ← A ⊣ i}
                → C ⊑ idR → R ○ C ⊑ R
 corefl-intro-r {C = C} {R} C⊑idR =
@@ -46,6 +49,8 @@ corefl-intro-l {C = C} {R} C⊑idR =
     R
   ⊑∎
  where open import AlgebraicReasoning.Relations
+
+
 
 open import Data.List using (List)
 open import Data.List.Utilities using (check; corefl-check)
