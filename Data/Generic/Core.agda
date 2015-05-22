@@ -52,6 +52,12 @@ unsnd (snd x) = x
 data μ (F : PolyF) {i} (A : Set i) : Set i where
   In : ⟦ F ⟧ A (μ F A) → μ F A
 
+In-surjective : ∀ {F i}{A : Set i} → idR {A = μ F A} ⊑ fun In ○ fun In ˘
+In-surjective (In xs) ._ refl = xs , refl , refl
+
+In-injective : ∀ {F i}{A : Set i} → fun In ˘ ○ fun In ⊑ idR {A = ⟦ F ⟧ A (μ F A)}
+In-injective xs ._ (._ , refl , refl) = refl
+
 bimap : (F : PolyF) → ∀ {i j k l} {A₁ : Set i} {A₂ : Set j} {B₁ : Set k} {B₂ : Set l}
         → (A₁ → A₂) → (B₁ → B₂) → ⟦ F ⟧ A₁ B₁ → ⟦ F ⟧ A₂ B₂
 bimap zer f g ()

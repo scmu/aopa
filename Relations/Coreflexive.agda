@@ -4,6 +4,7 @@ open import Level
 open import Data.Product
 open import Sets
 open import Relations
+open import AlgebraicReasoning.Relations
 
 -- coreflexives built from sets
 
@@ -36,7 +37,6 @@ corefl-intro-r {C = C} {R} C⊑idR =
   ⊑⟨ id-intro-r ⟩
     R
   ⊑∎
- where open import AlgebraicReasoning.Relations
 
 corefl-intro-l : ∀ {i j} {A : Set i} {B : Set j} {C : B ← B} {R : B ← A ⊣ j}
                → C ⊑ idR → C ○ R ⊑ R
@@ -48,9 +48,30 @@ corefl-intro-l {C = C} {R} C⊑idR =
   ⊑⟨ id-intro-l ⟩
     R
   ⊑∎
- where open import AlgebraicReasoning.Relations
 
+-- Eliminating a reflexive relation
 
+refl-elim-r : ∀ {i j} {A : Set i} {B : Set j} {C : A ← A} {R : B ← A ⊣ i}
+              → idR ⊑ C → R ⊑ R ○ C
+refl-elim-r {C = C} {R} id⊑C =
+  ⊑-begin
+    R 
+  ⊑⟨ id-elim-r ⟩
+    R ○ idR
+  ⊑⟨ ○-monotonic-r id⊑C ⟩
+    R ○ C
+  ⊑∎
+
+refl-elim-l : ∀ {i j} {A : Set i} {B : Set j} {C : B ← B} {R : B ← A ⊣ j}
+              → idR ⊑ C → R ⊑ C ○ R
+refl-elim-l {C = C} {R} id⊑C =
+  ⊑-begin
+    R 
+  ⊑⟨ id-elim-l ⟩
+    idR ○ R
+  ⊑⟨ ○-monotonic-l id⊑C ⟩
+    C ○ R
+  ⊑∎
 
 open import Data.List using (List)
 open import Data.List.Utilities using (check; corefl-check)
