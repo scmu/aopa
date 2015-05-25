@@ -73,6 +73,11 @@ refl-elim-l {C = C} {R} id⊑C =
     C ○ R
   ⊑∎
 
+total-pred : ∀ {i} {A : Set i} {P : A → Set i}
+             → (∀ x → P x)
+             → idR ⊑ P ¿ 
+total-pred P-total x ._ refl = refl , P-total x
+
 open import Data.List using (List)
 open import Data.List.Utilities using (check; corefl-check)
 

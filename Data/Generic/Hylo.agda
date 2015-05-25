@@ -9,6 +9,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import Relations
 open import Relations.Converse
+open import Relations.Coreflexive
 open import Relations.Function
 open import Relations.Factor
 open import Relations.CompChain
@@ -21,6 +22,10 @@ open import AlgebraicReasoning.Relations
 open import Data.Generic.Core
 open import Data.Generic.Membership
 open import Data.Generic.Fold
+
+-- ⦇ R ⦈ ○ ⦇ S ⦈ ˘ is a least prefixed point. That is,
+--    R ○ fmapR F (⦇ R ⦈ ○ ⦇ S ⦈ ˘) ○ S ˘ ⊑ ⦇ R ⦈ ○ ⦇ S ⦈ ˘     ∧
+--    ∀ {X} → R ○ fmapR F X ○ S ˘ ⊑ X → ⦇ R ⦈ ○ ⦇ S ⦈ ˘ ⊑ X
 
 
 hylo-lpfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
@@ -100,10 +105,34 @@ hylo-lpfp {F = F} {R} {S} = (pfp , least)
             ⦇ S ⦈ ○ fun In ⊑ S ○ fmapR F ⦇ S ⦈
           ⇐∎) (foldR-computation-⊑ S) 
 
+-- ⦇ R ⦈ ○ ⦇ S ⦈ ˘ is a least fixed point. That is, 
+--    R ○ fmapR F (⦇ R ⦈ ○ ⦇ S ⦈ ˘) ○ S ˘ ≑ ⦇ R ⦈ ○ ⦇ S ⦈ ˘     ∧
+--    ∀ {X} → R ○ fmapR F X ○ S ˘ ≑ X → ⦇ R ⦈ ○ ⦇ S ⦈ ˘ ≑ X
+
 hylo-lfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
           → LeastFixedPoint (_≑_) (_⊑_) (λ X → R ○ fmapR F X ○ S ˘) (⦇ R ⦈ ○ ⦇ S ⦈ ˘)
 hylo-lfp = lpfp⇒lfp _≑_ _⊑_ ⊑-isPartialOrder _ (λ x⊑y → ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ _ ⊑-refl x⊑y))) _ hylo-lpfp
 
+
+-- ⦇ R ⦈ ○ ⦇ S ⦈ ˘ is the unique fixed point, provided that
+--  S is F-reductive.
+
+hylo-unique : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : ⟦ F ⟧ A C ← C}
+            → well-found (ε F ○ S)
+            → {X : B ← C} → X ≑ R ○ fmapR F X ○ S
+            → {Y : B ← C} → Y ≑ R ○ fmapR F Y ○ S
+            → X ⊑ Y          
+hylo-unique {F = F} {R} {S} wf {X} X-fix {Y} Y-fix =
+  (⇐-begin
+     X ⊑ Y     
+   ⇐⟨ ⊑-trans (refl-elim-r (total-pred wf)) ⟩
+     X ○ (Acc (ε F ○ S)) ¿ ⊑ Y     
+   ⇐⟨ ? ⟩
+     Acc (ε F ○ S) ⊆ ⋱Y
+   ⇐⟨ {!!} ⟩ {!!} ) {!!}
+  
+
+-- a functional hylomoprhism
 
 mutual
  hylo-acc : (F : PolyF) → ∀ {j} {A : Set} {B : Set j} {C : Set}

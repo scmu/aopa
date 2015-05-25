@@ -134,8 +134,8 @@ lpfp⇒lfp _≈_ _≼_ partial f f-mono μf lpfp =
 
   {- The situation with the other direction is a bit awkward.
 
-     Given a least prefixed-point μf, we cannot prove that it is also
-     a least fixed-point. We may only prove that μf equals any
+     Given a least fixed-point φf, we cannot prove that it is also
+     a least prefixed-point. We may only prove that φf equals any
      least fixed point up to _≈_.
   -}
 
