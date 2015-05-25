@@ -102,3 +102,4 @@ _⋱_ : ∀ {i} {A B : Set i}
                 → R ○ (R ⋱ S) ¿ ⊑ S
 ⋱-cancellation R S = ⋱-universal-⇒ (R ⋱ S) R S ⊆-refl
 
+

@@ -7,11 +7,13 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (Σ; ∃; _×_; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
+open import Sets using (_⊆_; ⊆-trans)
 open import Relations
 open import Relations.Converse
 open import Relations.Coreflexive
 open import Relations.Function
 open import Relations.Factor
+open import Relations.MonoFactor
 open import Relations.CompChain
 open import Relations.WellFound
 open import Relations.Poset
@@ -36,9 +38,7 @@ hylo-lpfp {F = F} {R} {S} = (pfp , least)
     pfp =
       ⊑-begin
         R ○ fmapR F (⦇ R ⦈ ○ ⦇ S ⦈ ˘) ○ S ˘
-      ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F id-idempotent-⊒ ⊑-refl)) ⟩
-        R ○ bimapR F (idR ○ idR) (⦇ R ⦈ ○ ⦇ S ⦈ ˘) ○ S ˘
-      ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-functor-⊒ F)) ⟩
+      ⊑⟨ ○-monotonic-r (○-monotonic-l (fmapR-functor-⊒ F)) ⟩
         R ○ (fmapR F ⦇ R ⦈ ○ fmapR F (⦇ S ⦈ ˘)) ○ S ˘
       ⊑⟨ ○-monotonic-r ○-assocr ⟩
         R ○ fmapR F ⦇ R ⦈ ○ fmapR F (⦇ S ⦈ ˘) ○ S ˘
@@ -85,9 +85,9 @@ hylo-lpfp {F = F} {R} {S} = (pfp , least)
         ((R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
       ⇐⟨ ⊑-trans (○-monotonic-l ○-assocr) ⟩
         (R ○ (fmapR F (X / ⦇ S ⦈ ˘)) ○ fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
-      ⇐⟨ ⊑-trans (○-monotonic-l (⇦-mono-r (R ‥) (bimapR-functor-⊑ F))) ⟩
-        (R ○ bimapR F (idR ○ idR) (X / ⦇ S ⦈ ˘ ○ ⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
-      ⇐⟨ ⊑-trans (⇦-mono-l ((R ○ bimapR F (idR ○ idR) (X / ⦇ S ⦈ ˘ ○ ⦇ S ⦈ ˘)) ‥) (R ● fmapR F X ‥) (○-monotonic-r (bimapR-monotonic-⊑ F id-idempotent-⊑ (/-universal-⇒ ⊑-refl)))) ⟩
+      ⇐⟨ ⊑-trans (○-monotonic-l (⇦-mono-r (R ‥) (fmapR-functor-⊑ F))) ⟩
+        (R ○ fmapR F (X / ⦇ S ⦈ ˘ ○ ⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
+      ⇐⟨ ⊑-trans (⇦-mono-l ((R ○ fmapR F (X / ⦇ S ⦈ ˘ ○ ⦇ S ⦈ ˘)) ‥) (R ● fmapR F X ‥) (○-monotonic-r (fmapR-monotonic F (/-universal-⇒ ⊑-refl)))) ⟩
         R ○ fmapR F X ○ S ˘ ⊑ X
       ⇐∎
      where
@@ -122,14 +122,31 @@ hylo-unique : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : ⟦ F ⟧
             → {X : B ← C} → X ≑ R ○ fmapR F X ○ S
             → {Y : B ← C} → Y ≑ R ○ fmapR F Y ○ S
             → X ⊑ Y          
-hylo-unique {F = F} {R} {S} wf {X} X-fix {Y} Y-fix =
+hylo-unique {F = F} {R} {S} wf {X} (X-fix-⊑ , X-fix-⊒) {Y} (Y-fix-⊑ , Y-fix-⊒) =
   (⇐-begin
      X ⊑ Y     
    ⇐⟨ ⊑-trans (refl-elim-r (total-pred wf)) ⟩
      X ○ (Acc (ε F ○ S)) ¿ ⊑ Y     
-   ⇐⟨ ? ⟩
-     Acc (ε F ○ S) ⊆ ⋱Y
-   ⇐⟨ {!!} ⟩ {!!} ) {!!}
+   ⇐⟨ ⋱-universal-⇒ (Acc (ε F ○ S)) _ _ ⟩
+     Acc (ε F ○ S) ⊆ X ⋱ Y
+   ⇐⟨ acc-fold (ε F ○ S) ⟩
+     (ε F ○ S) ⍀ (X ⋱ Y) ⊆ X ⋱ Y
+   ⇐⟨ ⊆-trans (ε-⍀-⊆ _ _) ⟩
+     S ⍀ (fmapP F (X ⋱ Y)) ⊆ X ⋱ Y
+   ⇐⟨ ⋱-universal-⇐ _ _ _ ⟩
+     X ○ (S ⍀ (fmapP F (X ⋱ Y))) ¿ ⊑ Y
+   ⇐⟨ ⊑-trans (⇦-mono-l (X ‥) (R ● fmapR F X ● S ‥) X-fix-⊑) ⟩
+     R ○ fmapR F X ○ S ○ (S ⍀ fmapP F (X ⋱ Y)) ¿ ⊑ Y
+   ⇐⟨ ⊑-trans (⇦-mono-r (R ● fmapR F X ‥) (⍀-cancellation _ _)) ⟩
+     R ○ fmapR F X ○ fmapP F (X ⋱ Y) ¿ ○ S ⊑ Y
+   ⇐⟨ ⊑-trans (⇦-mono (R ● fmapR F X ‥) (fmapP F (X ⋱ Y) ¿ ‥) (fmapR F ((X ⋱ Y) ¿) ‥) (fmap-¿-⊑ F _)) ⟩
+     R ○ fmapR F X ○ fmapR F ((X ⋱ Y) ¿) ○ S ⊑ Y
+   ⇐⟨ ⊑-trans (⇦-mono (R ‥) (fmapR F X ● fmapR F ((X ⋱ Y) ¿) ‥) (fmapR F (X ○ (X ⋱ Y) ¿) ‥) (fmapR-functor-⊑ F)) ⟩
+     R ○ fmapR F (X ○ (X ⋱ Y) ¿) ○ S ⊑ Y
+   ⇐⟨ ⊑-trans (⇦-mono (R ‥) (fmapR F (X ○ (X ⋱ Y) ¿) ‥) (fmapR F Y ‥)
+        (bimapR-monotonic-⊑ F ⊑-refl (⋱-cancellation _ _))) ⟩
+     R ○ fmapR F Y ○ S ⊑ Y
+   ⇐∎) Y-fix-⊒
   
 
 -- a functional hylomoprhism
