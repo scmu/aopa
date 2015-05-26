@@ -21,12 +21,15 @@ open import Relation.Binary using (IsPreorder; Transitive)
 open import Relation.Binary.PropositionalEquality
 
 
-foldR-↾-absorption : (F : PolyF) → {A B : Set}
+-- A greedy algorithm that makes the greedy choice in the
+-- catamorphism phase.
+
+greedy-cata : (F : PolyF) → {A B : Set}
                    → {S : B ← ⟦ F ⟧ A B} {R : B ← B}
                    → IsPreorder (_≡_) R
                    → S ○ fmapR F (R ˘) ⊑ (R ˘) ○ S
                    →  ⦇ S ↾ R ⦈ ⊑ ⦇ S ⦈ ↾ R
-foldR-↾-absorption F {S = S} {R} isPre SFR˘⊑R˘S =
+greedy-cata F {S = S} {R} isPre SFR˘⊑R˘S =
   (⇐-begin
      ⦇ S ↾ R ⦈ ⊑ ⦇ S ⦈ ↾ R
    ⇐⟨ ↾-universal-⇐ ⟩
@@ -49,7 +52,7 @@ foldR-↾-absorption F {S = S} {R} isPre SFR˘⊑R˘S =
          fmapR F R ○ (S ˘) ⊑ (S ˘) ○ R
        ⇐⟨ ⊑-trans (○-monotonic-l ˘-idempotent-⊑) ⟩
          ((fmapR F R ˘) ˘) ○ (S ˘) ⊑ (S ˘) ○ R
-       ⇐⟨ ⊑-trans (○-monotonic-l (˘-monotonic-⇐ (bimapR-˘-preservation-⊑ F))) ⟩
+       ⇐⟨ ⊑-trans (○-monotonic-l (˘-monotonic-⇐ (fmapR-˘-preservation-⊑ F))) ⟩
          (fmapR F (R ˘) ˘) ○ (S ˘) ⊑ (S ˘) ○ R
        ⇐⟨ ⊒-trans (○-monotonic-r ˘-idempotent-⊑) ⟩
          (fmapR F (R ˘) ˘) ○ (S ˘) ⊑ (S ˘) ○ ((R ˘) ˘)
@@ -61,13 +64,16 @@ foldR-↾-absorption F {S = S} {R} isPre SFR˘⊑R˘S =
          S ○ fmapR F (R ˘) ⊑ (R ˘) ○ S
        ⇐∎) SFR˘⊑R˘S
 
-greedy-theorem : {A B C : Set} {F : PolyF} {S : C ← ⟦ F ⟧ A C} {T : B ← ⟦ F ⟧ A B} {R : C ← C} {Q : ⟦ F ⟧ A B ← ⟦ F ⟧ A B}
+-- A greedy algorithm that makes the greedy choice in the
+-- anamorphism phase, with context.
+
+greedy-ana-cxt : {A B C : Set} {F : PolyF} {S : C ← ⟦ F ⟧ A C} {T : B ← ⟦ F ⟧ A B} {R : C ← C} {Q : ⟦ F ⟧ A B ← ⟦ F ⟧ A B}
                → IsPreorder (_≡_) R
                → S ○ S ˘ ⊑ idR
                → S ○ fmapR F R ⊑ R ○ S
                → S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ○ (Q ⊓ (T ˘ ○ T)) ˘ ⊑ R ˘ ○ S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘)
                → ⦇ S ⦈ ○ ⦇((T ˘) ↾ Q) ˘ ⦈ ˘ ⊑ (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R
-greedy-theorem {F = F}{S}{T}{R}{Q} isPre S-simple mono greedy =
+greedy-ana-cxt {F = F}{S}{T}{R}{Q} isPre S-simple mono greedy =
   (⇐-begin
      ⦇ S ⦈ ○ ⦇((T ˘) ↾ Q) ˘ ⦈ ˘ ⊑ (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R
    ⇐⟨ proj₂ hylo-lpfp ⟩
@@ -82,11 +88,11 @@ greedy-theorem {F = F}{S}{T}{R}{Q} isPre S-simple mono greedy =
      ⊑-begin
        S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q)
      ⊑⟨ ○-monotonic-r (○-monotonic-r (↾-universal-⇒₁ {R = Q} ⊑-refl)) ⟩
-       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘)
+       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ T ˘
      ⊑⟨ ○-monotonic-r
           (○-monotonic-l
            (bimapR-monotonic-⊑ F ⊑-refl (↾-universal-⇒₁ {R = R} ⊑-refl))) ⟩
-       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘)) ○ (T ˘)
+       S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ○ T ˘
      ⊑⟨ proj₁ hylo-lpfp ⟩
        ⦇ S ⦈ ○ ⦇ T ⦈ ˘
      ⊑∎
@@ -95,28 +101,29 @@ greedy-theorem {F = F}{S}{T}{R}{Q} isPre S-simple mono greedy =
    pf₂ = 
      ⊑-begin
        (S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘
-     ⊑⟨ ○-monotonic-r (˘-○-distr-⊑ ⦇ S ⦈ (⦇ T ⦈ ˘)) ⟩
-       (S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (⦇ T ⦈ ○ ⦇ S ⦈ ˘)
-     ⊑⟨ ○-monotonic-r (proj₂ (proj₁ hylo-lfp)) ⟩
-       (S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (T ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘))
-     ⊑⟨ ○-assocr ⟩
-       S ○ (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q)) ○ (T ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘))
-     ⊑⟨ ○-monotonic-r ○-assocr ⟩
+     ⊑⟨ ⊑-trans ○-assocr (○-monotonic-r ○-assocr) ⟩ 
+       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q) ○ (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘
+     ⊑⟨ ⇦-mono-r (S ● fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘ ↾ R) ● (T ˘ ↾ Q) ‥) (˘-○-distr-⊑ ⦇ S ⦈ (⦇ T ⦈ ˘)) ⟩
+       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q) ○ ⦇ T ⦈ ○ ⦇ S ⦈ ˘
+     ⊑⟨ ⇦-mono-r (S ● fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘ ↾ R) ● (T ˘ ↾ Q) ‥) (proj₂ (proj₁ hylo-lfp)) ⟩
+       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (T ˘ ↾ Q) ○ T ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘)
+     ⊑⟨ ⊑-refl ⟩ 
        S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ ((T ˘) ⊓ (Q / T)) ○ T ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘)
      ⊑⟨ ⇦-mono (S ● fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ‥) ((T ˘) ⊓ (Q / T) ● T ‥) (((T ˘ ○ T) ⊓ (Q / T ○ T)) ‥) ○-⊓-distr-r ⟩
-       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (((T ˘) ○ T) ⊓ ((Q / T) ○ T)) ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘)
+       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ ((T ˘ ○ T) ⊓ ((Q / T) ○ T)) ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘)
      ⊑⟨ ⇦-mono (S ● fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ‥) (((T ˘ ○ T) ⊓ (Q / T ○ T)) ‥) (((T ˘ ○ T) ⊓ Q) ‥) (⊓-monotonic ⊑-refl (/-universal-⇒ ⊑-refl)) ⟩
-       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (((T ˘) ○ T) ⊓ Q) ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘)
-     ⊑⟨ ○-monotonic-r (○-monotonic-r (○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F ⊑-refl (˘-○-distr-⊒ ⦇ S ⦈ (⦇ T ⦈ ˘)))))) ⟩
-       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ (((T ˘) ○ T) ⊓ Q) ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ○ (S ˘)
+       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ ((T ˘ ○ T) ⊓ Q) ○ fmapR F (⦇ T ⦈ ○ ⦇ S ⦈ ˘) ○ (S ˘)
+     ⊑⟨ ○-monotonic-r (○-monotonic-r (○-monotonic-r (○-monotonic-l (fmapR-monotonic F (˘-○-distr-⊒ ⦇ S ⦈ (⦇ T ⦈ ˘)))))) ⟩
+       S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ ((T ˘ ○ T) ⊓ Q) ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ○ (S ˘)
      ⊑⟨ ○-monotonic-r (○-monotonic-r greedy-˘) ⟩
        S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ○ (S ˘) ○ R
-     ⊑⟨ ⇦-mono (S ‥) (fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘ ↾ R) ●
-                        fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ‥)
-                     (bimapR F (idR ○ idR)
-                       ((⦇ S ⦈ ○ ⦇ T ⦈ ˘ ↾ R) ○ (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ‥) (bimapR-functor-⊑ F) ⟩
-       S ○ bimapR F (idR ○ idR) (((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘)) ○ (S ˘) ○ R
-     ⊑⟨ ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ F id-idempotent-⊑ (↾-universal-⇒₂ ⊑-refl))) ⟩
+     ⊑⟨ ⇦-mono (S ‥)
+          (fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘ ↾ R) ● fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ‥)
+          (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘ ↾ R) ○ (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ‥)
+          (fmapR-functor-⊑ F) ⟩
+       S ○ fmapR F (((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘)) ○ (S ˘) ○ R
+     ⊑⟨ ○-monotonic-r
+          (○-monotonic-l (fmapR-monotonic F (↾-universal-⇒₂ ⊑-refl))) ⟩
        S ○ fmapR F R ○ (S ˘) ○ R
      ⊑⟨ ⇦-mono-l (S ● fmapR F R ‥) (R ● S ‥) mono ⟩
        R ○ S ○ S ˘ ○ R
@@ -136,11 +143,11 @@ greedy-theorem {F = F}{S}{T}{R}{Q} isPre S-simple mono greedy =
            ((T ˘ ○ T) ⊓ Q ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ○ (S ˘)) ˘ ⊑ (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ○ (S ˘) ○ R) ˘
          ⇐⟨ ⊑-trans ˘-○-distr3-⊑ ⟩
            S ○ (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ○ (S ˘) ○ R) ˘
-         ⇐⟨ ⊑-trans (○-monotonic-r (○-monotonic-l (bimapR-˘-preservation-⊑ F))) ⟩
+         ⇐⟨ ⊑-trans (○-monotonic-r (○-monotonic-l (fmapR-˘-preservation-⊑ F))) ⟩
            S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ○ (S ˘) ○ R) ˘
          ⇐⟨ ⊒-trans (˘-○-distr3-⊒ (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘)) (S ˘) R) ⟩
            S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ R ˘ ○ S ○ (fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ˘) ˘)
-         ⇐⟨ ⊒-trans (○-monotonic-r (○-monotonic-r (bimapR-˘-preservation-⊒ F))) ⟩
+         ⇐⟨ ⊒-trans (○-monotonic-r (○-monotonic-r (fmapR-˘-preservation-⊒ F))) ⟩
            S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ○ ((T ˘ ○ T) ⊓ Q) ˘ ⊑ R ˘ ○ S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘)
          ⇐⟨ ⊑-trans (○-monotonic-r (○-monotonic-r ⊓-commute)) ⟩
            S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ○ (Q ⊓ (T ˘ ○ T)) ˘ ⊑ R ˘ ○ S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘)
