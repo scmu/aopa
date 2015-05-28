@@ -449,9 +449,7 @@ foldR-fusion-⊒ F S R T =
      T ○ fmapR F (S ○ ⦇ R ⦈) ⊑ S ○ ⦇ R ⦈ ○ fun In
    ⇐⟨ ⊒-trans (○-monotonic-r (foldR-computation-⊒ R)) ⟩ 
      T ○ fmapR F (S ○ ⦇ R ⦈) ⊑ S ○ R ○ fmapR F ⦇ R ⦈
-   ⇐⟨ ⊑-trans (○-monotonic-r (bimapR-monotonic-⊑ F id-idempotent-⊒ ⊑-refl)) ⟩ 
-     T ○ bimapR F (idR ○ idR) (S ○ ⦇ R ⦈) ⊑ S ○ R ○ fmapR F ⦇ R ⦈
-   ⇐⟨ ⊑-trans (○-monotonic-r (bimapR-functor-⊒ F)) ⟩ 
+   ⇐⟨ ⊑-trans (○-monotonic-r (fmapR-functor-⊒ F)) ⟩ 
      T ○ fmapR F S ○ fmapR F ⦇ R ⦈ ⊑ S ○ R ○ fmapR F ⦇ R ⦈
    ⇐⟨ ⇦-mono-l (T ● fmapR F S ‥) (S ● R ‥) ⟩ 
      T ○ fmapR F S ⊑ S ○ R 
@@ -470,9 +468,7 @@ foldR-fusion-⊑ F S R T =
      S ○ ⦇ R ⦈ ○ fun In ⊑ T ○ fmapR F (S ○ ⦇ R ⦈)  
    ⇐⟨ ⊑-trans (○-monotonic-r (foldR-computation-⊑ R)) ⟩ 
      S ○ R ○ fmapR F ⦇ R ⦈ ⊑ T ○ fmapR F (S ○ ⦇ R ⦈)  
-   ⇐⟨ ⊒-trans (○-monotonic-r (bimapR-monotonic-⊒ F id-idempotent-⊑ ⊒-refl)) ⟩ 
-     S ○ R ○ fmapR F ⦇ R ⦈ ⊑ T ○ bimapR F (idR ○ idR) (S ○ ⦇ R ⦈) 
-   ⇐⟨ ⊒-trans (○-monotonic-r (bimapR-functor-⊑ F)) ⟩ 
+   ⇐⟨ ⊒-trans (○-monotonic-r (fmapR-functor-⊑ F)) ⟩ 
      S ○ R ○ fmapR F ⦇ R ⦈ ⊑ T ○ fmapR F S ○ fmapR F ⦇ R ⦈
    ⇐⟨ ⇦-mono-l (S ● R ‥) (T ● fmapR F S ‥)  ⟩ 
      S ○ R ⊑ T ○ fmapR F S

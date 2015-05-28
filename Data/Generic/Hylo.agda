@@ -5,7 +5,7 @@ open import Function using (_∘_; id)
 open import Data.Empty using (⊥)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (Σ; ∃; _×_; _,_; proj₁; proj₂)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Relation.Binary.PropositionalEquality
 
 open import Sets using (_⊆_; ⊆-trans)
 open import Relations
@@ -111,18 +111,19 @@ hylo-lpfp {F = F} {R} {S} = (pfp , least)
 
 hylo-lfp : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : C ← ⟦ F ⟧ A C}
           → LeastFixedPoint (_≑_) (_⊑_) (λ X → R ○ fmapR F X ○ S ˘) (⦇ R ⦈ ○ ⦇ S ⦈ ˘)
-hylo-lfp = lpfp⇒lfp _≑_ _⊑_ ⊑-isPartialOrder _ (λ x⊑y → ○-monotonic-r (○-monotonic-l (bimapR-monotonic-⊑ _ ⊑-refl x⊑y))) _ hylo-lpfp
+hylo-lfp = lpfp⇒lfp _≑_ _⊑_ ⊑-isPartialOrder _ (λ x⊑y → ○-monotonic-r (○-monotonic-l (bimapR-monotonic _ ⊑-refl x⊑y))) _ hylo-lpfp
 
 
--- ⦇ R ⦈ ○ ⦇ S ⦈ ˘ is the unique fixed point, provided that
---  S is F-reductive.
+-- Consider f X = R ○ fmapR F X ○ S.
+-- If (ε F ○ S) is inductive, any postfixed-point of
+-- f is at most any prefixed-point of f.
 
-hylo-unique : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : ⟦ F ⟧ A C ← C}
+hylo-post⊑pre : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : ⟦ F ⟧ A C ← C}
             → well-found (ε F ○ S)
-            → {X : B ← C} → X ≑ R ○ fmapR F X ○ S
-            → {Y : B ← C} → Y ≑ R ○ fmapR F Y ○ S
+            → {X : B ← C} → X ⊑ R ○ fmapR F X ○ S
+            → {Y : B ← C} → Y ⊒ R ○ fmapR F Y ○ S
             → X ⊑ Y          
-hylo-unique {F = F} {R} {S} wf {X} (X-fix-⊑ , X-fix-⊒) {Y} (Y-fix-⊑ , Y-fix-⊒) =
+hylo-post⊑pre {F = F} {R} {S} wf {X} X-postfix {Y} Y-prefix =
   (⇐-begin
      X ⊑ Y     
    ⇐⟨ ⊑-trans (refl-elim-r (total-pred wf)) ⟩
@@ -135,7 +136,7 @@ hylo-unique {F = F} {R} {S} wf {X} (X-fix-⊑ , X-fix-⊒) {Y} (Y-fix-⊑ , Y-fi
      S ⍀ (fmapP F (X ⋱ Y)) ⊆ X ⋱ Y
    ⇐⟨ ⋱-universal-⇐ _ _ _ ⟩
      X ○ (S ⍀ (fmapP F (X ⋱ Y))) ¿ ⊑ Y
-   ⇐⟨ ⊑-trans (⇦-mono-l (X ‥) (R ● fmapR F X ● S ‥) X-fix-⊑) ⟩
+   ⇐⟨ ⊑-trans (⇦-mono-l (X ‥) (R ● fmapR F X ● S ‥) X-postfix) ⟩
      R ○ fmapR F X ○ S ○ (S ⍀ fmapP F (X ⋱ Y)) ¿ ⊑ Y
    ⇐⟨ ⊑-trans (⇦-mono-r (R ● fmapR F X ‥) (⍀-cancellation _ _)) ⟩
      R ○ fmapR F X ○ fmapP F (X ⋱ Y) ¿ ○ S ⊑ Y
@@ -144,18 +145,28 @@ hylo-unique {F = F} {R} {S} wf {X} (X-fix-⊑ , X-fix-⊒) {Y} (Y-fix-⊑ , Y-fi
    ⇐⟨ ⊑-trans (⇦-mono (R ‥) (fmapR F X ● fmapR F ((X ⋱ Y) ¿) ‥) (fmapR F (X ○ (X ⋱ Y) ¿) ‥) (fmapR-functor-⊑ F)) ⟩
      R ○ fmapR F (X ○ (X ⋱ Y) ¿) ○ S ⊑ Y
    ⇐⟨ ⊑-trans (⇦-mono (R ‥) (fmapR F (X ○ (X ⋱ Y) ¿) ‥) (fmapR F Y ‥)
-        (bimapR-monotonic-⊑ F ⊑-refl (⋱-cancellation _ _))) ⟩
+        (bimapR-monotonic F ⊑-refl (⋱-cancellation _ _))) ⟩
      R ○ fmapR F Y ○ S ⊑ Y
-   ⇐∎) Y-fix-⊒
+   ⇐∎) Y-prefix
   
+-- Therefore, if (ε F ○ S) is inductive, 
+-- f X = R ○ fmapR F X ○ S has a unique fixed point, if any.
 
+hylo-unique : {A B C : Set} {F : PolyF} {R : B ← ⟦ F ⟧ A B} {S : ⟦ F ⟧ A C ← C}
+            → well-found (ε F ○ S)
+            → {X : B ← C} → X ≑ R ○ fmapR F X ○ S
+            → {Y : B ← C} → Y ≑ R ○ fmapR F Y ○ S
+            → X ≑ Y
+hylo-unique wf (X-post , X-pre) (Y-post , Y-pre) =
+  (hylo-post⊑pre wf X-post Y-pre , hylo-post⊑pre wf Y-post X-pre)          
+            
 -- a functional hylomoprhism
 
 mutual
- hylo-acc : (F : PolyF) → ∀ {j} {A : Set} {B : Set j} {C : Set}
+ hylo-acc : {F : PolyF} → ∀ {j} {A : Set} {B : Set j} {C : Set}
           → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C)
           → (c : C) → Acc (ε F ○ fun g) c → B
- hylo-acc F {A = A} {B} {C} f g c (acc .c h) =
+ hylo-acc {F} {A = A} {B} {C} f g c (acc .c h) =
    f (fmap-hylo f g c h F (g c) root)
   
  fmap-hylo : {F : PolyF} {j : Level} {A : Set} {B : Set j} {C : Set}
@@ -167,26 +178,29 @@ mutual
  fmap-hylo f g c h zer ()
  fmap-hylo f g c h one tt _ = tt
  fmap-hylo f g c h arg₁ (fst x) _ = fst x
- fmap-hylo f g c h arg₂ (snd y) p = snd (hylo-acc _ f g y (h y (g c , refl , path-to-ε p)))
+ fmap-hylo f g c h arg₂ (snd y) p = snd (hylo-acc f g y (h y (g c , refl , path-to-ε p)))
  fmap-hylo f g c h (G₀ ⊕ G₁) (inj₁ y) p = inj₁ (fmap-hylo f g c h G₀ y (inj₁ p))
  fmap-hylo f g c h (G₀ ⊕ G₁) (inj₂ y) p = inj₂ (fmap-hylo f g c h G₁ y (inj₂ p))
  fmap-hylo f g c h (G₀ ⊗ G₁) (y₀ , y₁) p =
    fmap-hylo f g c h G₀ y₀ (out₁ p) ,
    fmap-hylo f g c h G₁ y₁ (out₂ p)
 
-hylo : (F : PolyF) → ∀ {j} {A : Set} {B : Set j} {C : Set}
+hylo : {F : PolyF} → ∀ {j} {A : Set} {B : Set j} {C : Set}
      → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C)
      → well-found (ε F ○ fun g)
      → C → B
-hylo F f g wf c = hylo-acc F f g c (wf c)
+hylo f g wf c = hylo-acc f g c (wf c)
+
+-- proof irrelevance: as long as there is a proof of
+-- accessibility, we don't care which one.
 
 mutual
-  hylo-acc-irr : (F : PolyF) → ∀ {j} {A : Set} {B : Set j} {C : Set}
+  hylo-acc-irr : {F : PolyF} → ∀ {j} {A : Set} {B : Set j} {C : Set}
                → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C)
                → (c : C)
                → (ac₁ : Acc (ε F ○ fun g) c) → (ac₂ : Acc (ε F ○ fun g) c)
-               → hylo-acc F f g c ac₁ ≡ hylo-acc F f g c ac₂
-  hylo-acc-irr F f g c (acc ._ h₁) (acc ._ h₂) 
+               → hylo-acc f g c ac₁ ≡ hylo-acc f g c ac₂
+  hylo-acc-irr {F} f g c (acc ._ h₁) (acc ._ h₂) 
     rewrite fmap-hylo-irr f g c h₁ h₂ F (g c) root = refl
 
   fmap-hylo-irr : {F : PolyF} {j : Level} {A : Set} {B : Set j} {C : Set}
@@ -200,8 +214,8 @@ mutual
   fmap-hylo-irr f g c h₁ h₂ one tt p = refl
   fmap-hylo-irr f g c h₁ h₂ arg₁ (fst x) p = refl
   fmap-hylo-irr f g c h₁ h₂ arg₂ (snd y) p
-   rewrite hylo-acc-irr _ f g y (h₁ y (g c , refl , path-to-ε p))
-                                (h₂ y (g c , refl , path-to-ε p)) = refl
+   rewrite hylo-acc-irr f g y (h₁ y (g c , refl , path-to-ε p))
+                              (h₂ y (g c , refl , path-to-ε p)) = refl
   fmap-hylo-irr f g c h₁ h₂ (G₀ ⊕ G₁) (inj₁ x) p
    rewrite fmap-hylo-irr f g c h₁ h₂ G₀ x (inj₁ p) = refl
   fmap-hylo-irr f g c h₁ h₂ (G₀ ⊕ G₁) (inj₂ y) p
@@ -211,31 +225,49 @@ mutual
          | fmap-hylo-irr f g c h₁ h₂ G₁ y₁ (out₂ p) = refl
 
 
-fmap-hylo-bimap :
+fmap-hylo-fmap :
            {F : PolyF} {j : Level} {A : Set} {B : Set j} {C : Set}
            → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C) → (wf : well-found (ε F ○ fun g))
            → (c : C)  → (h : ∀ z → (ε F ○ fun g) z c → Acc (ε F ○ fun g) z)
            → (G : PolyF) → (y : ⟦ G ⟧ A C)
            → (p : Path F (g c) G y)
            → fmap-hylo f g c h G y p ≡
-               bimap G id (λ d → hylo-acc F f g d (wf d)) y
-fmap-hylo-bimap f g wf c h zer () p
-fmap-hylo-bimap f g wf c h one tt p = refl
-fmap-hylo-bimap f g wf c h arg₁ (fst x) p = refl
-fmap-hylo-bimap f g wf c h arg₂ (snd x) p
-   rewrite hylo-acc-irr _ f g x (h x (g c , refl , path-to-ε p)) (wf x) = refl
-fmap-hylo-bimap f g wf c h (G₀ ⊕ G₁) (inj₁ x) p
-   rewrite fmap-hylo-bimap f g wf c h G₀ x (inj₁ p) = refl
-fmap-hylo-bimap f g wf c h (G₀ ⊕ G₁) (inj₂ y) p
-   rewrite fmap-hylo-bimap f g wf c h G₁ y (inj₂ p) = refl
-fmap-hylo-bimap f g wf c h (G₀ ⊗ G₁) (y₀ , y₁) p
-   rewrite fmap-hylo-bimap f g wf c h G₀ y₀ (out₁ p)
-         | fmap-hylo-bimap f g wf c h G₁ y₁ (out₂ p) = refl
+               fmap G (λ d → hylo-acc f g d (wf d)) y
+fmap-hylo-fmap f g wf c h zer () p
+fmap-hylo-fmap f g wf c h one tt p = refl
+fmap-hylo-fmap f g wf c h arg₁ (fst x) p = refl
+fmap-hylo-fmap f g wf c h arg₂ (snd x) p
+   rewrite hylo-acc-irr f g x (h x (g c , refl , path-to-ε p)) (wf x) = refl
+fmap-hylo-fmap f g wf c h (G₀ ⊕ G₁) (inj₁ x) p
+   rewrite fmap-hylo-fmap f g wf c h G₀ x (inj₁ p) = refl
+fmap-hylo-fmap f g wf c h (G₀ ⊕ G₁) (inj₂ y) p
+   rewrite fmap-hylo-fmap f g wf c h G₁ y (inj₂ p) = refl
+fmap-hylo-fmap f g wf c h (G₀ ⊗ G₁) (y₀ , y₁) p
+   rewrite fmap-hylo-fmap f g wf c h G₀ y₀ (out₁ p)
+         | fmap-hylo-fmap f g wf c h G₁ y₁ (out₂ p) = refl
 
-hylo-is-hylo : (F : PolyF) → ∀ {j} {A : Set} {B : Set j} {C : Set}
+hylo-is-hylo : {F : PolyF} → ∀ {j} {A : Set} {B : Set j} {C : Set}
                → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C)
                → (wf : well-found (ε F ○ fun g))
                → (c : C)
-               → hylo F f g wf c ≡ (f ∘ bimap F id (hylo F f g wf) ∘ g) c
-hylo-is-hylo F f g wf c with wf c
-... | acc ._ h rewrite fmap-hylo-bimap f g wf c h F (g c) root = refl
+               → hylo f g wf c ≡ (f ∘ fmap F (hylo f g wf) ∘ g) c
+hylo-is-hylo {F} f g wf c with wf c
+... | acc ._ h rewrite fmap-hylo-fmap f g wf c h F (g c) root = refl
+
+
+hylo-fix : {F : PolyF} → ∀ {A B C : Set}
+         → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C)
+         → (wf : well-found (ε F ○ fun g))
+         → fun (hylo f g wf) ≑
+              fun f ○ fmapR F (fun (hylo f g wf)) ○ fun g
+hylo-fix {F} f g wf =
+  ≑-begin
+    fun (hylo f g wf)
+  ≑⟨  fun-cong (hylo-is-hylo f g wf) ⟩
+    fun (f ∘ fmap F (hylo f g wf) ∘ g)
+  ≑⟨ fun○3-≑ ⟩
+    fun f ○ fun (fmap F (hylo f g wf)) ○ fun g
+  ≑⟨ ○-cong-r (○-cong-l (fmap-fmapR _ _)) ⟩
+    fun f ○ fmapR F (fun (hylo f g wf)) ○ fun g
+  ≑∎
+
