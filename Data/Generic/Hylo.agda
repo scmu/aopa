@@ -224,7 +224,6 @@ mutual
    rewrite fmap-hylo-irr f g c h₁ h₂ G₀ y₀ (out₁ p)
          | fmap-hylo-irr f g c h₁ h₂ G₁ y₁ (out₂ p) = refl
 
-
 fmap-hylo-fmap :
            {F : PolyF} {j : Level} {A : Set} {B : Set j} {C : Set}
            → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C) → (wf : well-found (ε F ○ fun g))
@@ -271,3 +270,20 @@ hylo-fix {F} f g wf =
     fun f ○ fmapR F (fun (hylo f g wf)) ○ fun g
   ≑∎
 
+hylo-refine : {F : PolyF} → ∀ {A B C : Set}
+            → (f : ⟦ F ⟧ A B → B) → (g : C → ⟦ F ⟧ A C)
+            → (wf : well-found (ε F ○ fun g))
+            → ⦇ fun f  ⦈ ○ ⦇ (fun g)˘ ⦈ ˘ ≑ fun (hylo f g wf)
+hylo-refine {F} f g wf =
+  hylo-unique wf fp (hylo-fix f g wf)
+ where fp : ⦇ fun f ⦈ ○ ⦇ (fun g)˘ ⦈ ˘ ≑
+                fun f ○ fmapR F (⦇ fun f ⦈ ○ ⦇ (fun g)˘ ⦈ ˘) ○ fun g
+       fp =
+         ≑-begin
+            ⦇ fun f ⦈ ○ ⦇ (fun g)˘ ⦈ ˘
+         ≑⟨ ≑-sym (proj₁ hylo-lfp) ⟩
+            fun f ○ fmapR F (⦇ fun f ⦈ ○ ⦇ (fun g)˘ ⦈ ˘) ○ ((fun g)˘) ˘
+         ≑⟨ ○-cong-r (○-cong-r ˘-idempotent) ⟩
+            fun f ○ fmapR F (⦇ fun f ⦈ ○ ⦇ fun g ˘ ⦈ ˘) ○ fun g
+         ≑∎
+         
