@@ -114,6 +114,16 @@ R ≑ S = (R ⊑ S × S ⊑ R)
             → R ⊒ S → S ⊒ R → R ≑ S
 ⊒-antisym R⊒S S⊒R = S⊒R , R⊒S
 
+infix 4 _≛_
+
+_≛_ : ∀ {i j k} {A : Set i} {B : Set j} → (B ← A ⊣ k) → (B ← A ⊣ k) → Set (k ⊔ℓ (j ⊔ℓ i))
+R ≛ S = ∀ a b → (R a b → S a b) × (S a b → R a b)
+
+≛⇒̄≑ : ∀ {i j k} {A : Set i} {B : Set j}
+      → {R S : B ← A ⊣ k}
+      → R ≛ S → R ≑ S
+≛⇒̄≑ R≛S = (λ b a → proj₁ (R≛S b a)) , (λ b a → proj₂ (R≛S b a))
+
 -- converse and composition
 
 _˘ : ∀ {i j k} {A : Set i} {B : Set j} → (B ← A ⊣ k) → A ← B
@@ -172,6 +182,16 @@ _₁∘₁_ : ∀ {k} {A : Set} {B : Set1} {C : Set1} → (C ← B ⊣ k) → (A
 ○-monotonic-l R⊑S c a (b , (bTa , cRb)) =
                       (b , (bTa , R⊑S c b cRb))
 
+○-cong-r :  ∀ {i j k l m} {A : Set i} {B : Set j} {C : Set k} 
+                   {T : C ← B ⊣ l} {R S : B ← A ⊣ m}
+            → R ≑ S → T ○ R ≑ T ○ S
+○-cong-r (R⊑S , R⊒S) = (○-monotonic-r R⊑S , ○-monotonic-r R⊒S)
+
+○-cong-l : ∀ {i j k l m} {A : Set i} {B : Set j} {C : Set k} 
+                  {T : B ← A ⊣ l} {R S : C ← B ⊣ m}
+                → R ≑ S → R ○ T ≑ S ○ T
+○-cong-l (R⊑S , R⊒S) = ○-monotonic-l R⊑S , ○-monotonic-l R⊒S
+
  -- can this type be more general?
 modular-law : ∀ {i j} {A : Set i} {B : Set j} {C : Set j} {R : C ← B ⊣ j} {S : B ← A ⊣ j} {T : C ← A} 
               → (R ○ S) ⊓ T ⊑ R ○ (S ⊓ (R ˘ ○ T))
@@ -224,6 +244,9 @@ id-idempotent-⊒ a .a refl = (a , refl , refl)
 
 id-idempotent-⊑ : ∀ {i} {A : Set i} → idR ○ idR ⊑ idR {A = A}
 id-idempotent-⊑ a .a (.a , refl , refl) = refl 
+
+id-idempotent :  ∀ {i} {A : Set i} → idR ○ idR ≑ idR {A = A}
+id-idempotent = id-idempotent-⊑ , id-idempotent-⊒
 
 id-intro-r : ∀ {i j} {A : Set i} {B : Set j} {R : B ← A ⊣ i} → R ⊒ R ○ idR
 id-intro-r b a (.a , refl , bRa) = bRa  

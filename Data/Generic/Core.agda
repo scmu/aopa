@@ -9,10 +9,10 @@ open import Function using (_∘_; id; const)
 open import Level renaming (_⊔_ to _⊔ℓ_)
 open import Relation.Binary.PropositionalEquality
 
-open import AlgebraicReasoning.ExtensionalEquality 
-            using (_≐_)
-
 open import Relations
+open import Relations.Function using (_≐_)
+open import AlgebraicReasoning.Relations
+
 
 -- Polynomial bifunctors
 
@@ -67,6 +67,10 @@ bimap arg₂ f g (snd b) = snd (g b)
 bimap (F₁ ⊕ F₂) f g (inj₁ x) = inj₁ (bimap F₁ f g x)
 bimap (F₁ ⊕ F₂) f g (inj₂ y) = inj₂ (bimap F₂ f g y)
 bimap (F₁ ⊗ F₂) f g (x , y) = bimap F₁ f g x , bimap F₂ f g y
+
+fmap : (F : PolyF) → ∀ {i k l} {A : Set i} {B₁ : Set k} {B₂ : Set l}
+     → (B₁ → B₂) → ⟦ F ⟧ A B₁ → ⟦ F ⟧ A B₂
+fmap F f = bimap F id f
 
 bimap-comp : (F : PolyF) → ∀ {i j k l m n} {A₁ : Set i} {A₂ : Set j} {A₃ : Set k} {B₁ : Set l} {B₂ : Set m} {B₃ : Set n}
             → (f : A₂ → A₃) → (g : B₂ → B₃) → (h : A₁ → A₂) → (k : B₁ → B₂)
@@ -158,94 +162,133 @@ bimapR-functor-⊒ (F₁ ⊗ F₂) (z₁ , z₂) (x₁ , x₂) zRTSUx =
      (y₂ , yRTx₂ , zSUy₂) = bimapR-functor-⊒ F₂ z₂ x₂ (proj₂ zRTSUx)
    in ((y₁ , y₂) , (yRTx₁ , yRTx₂) , (zSUy₁ , zSUy₂))
 
-bimapR-monotonic-⊑ : (F : PolyF) → ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
+bimapR-functor : (F : PolyF) → ∀ {i j k l} {A₁ : Set i} {A₂ : Set} {A₃ : Set j}
+                 {B₁ : Set k} {B₂ : Set} {B₃ : Set l}
+                 {R : A₃ ← A₂} {S : B₃ ← B₂} {T : A₂ ← A₁} {U : B₂ ← B₁}
+               → bimapR F R S ○ bimapR F T U ≑ bimapR F (R ○ T) (S ○ U)
+bimapR-functor F = bimapR-functor-⊑ F , bimapR-functor-⊒ F
+
+bimapR-monotonic : (F : PolyF) → ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
                      {R S : B ← A} {T U : D ← C}
                     → (R ⊑ S) → (T ⊑ U) → (bimapR F R T ⊑ bimapR F S U)
-bimapR-monotonic-⊑ zer R⊑S T⊑U () _ _
-bimapR-monotonic-⊑ one R⊑S T⊑U tt tt _ = Data.Unit.tt
-bimapR-monotonic-⊑ arg₁ R⊑S T⊑U (fst b) (fst a) bRa = R⊑S b a bRa
-bimapR-monotonic-⊑ arg₂ R⊑S T⊑U (snd d) (snd c) dTc = T⊑U d c dTc
-bimapR-monotonic-⊑ (F₁ ⊕ F₂) R⊑S T⊑U (inj₁ y₁) (inj₁ x₁) yRTx = bimapR-monotonic-⊑ F₁ R⊑S T⊑U y₁ x₁ yRTx
-bimapR-monotonic-⊑ (F₁ ⊕ F₂) R⊑S T⊑U (inj₁ y₁) (inj₂ x₂) ()
-bimapR-monotonic-⊑ (F₁ ⊕ F₂) R⊑S T⊑U (inj₂ y₂) (inj₁ x₁) ()
-bimapR-monotonic-⊑ (F₁ ⊕ F₂) R⊑S T⊑U (inj₂ y₂) (inj₂ x₂) yRTx = bimapR-monotonic-⊑ F₂ R⊑S T⊑U y₂ x₂ yRTx
-bimapR-monotonic-⊑ (F₁ ⊗ F₂) R⊑S T⊑U (y₁ , y₂) (x₁ , x₂) yRTx =
-   (bimapR-monotonic-⊑ F₁ R⊑S T⊑U y₁ x₁ (proj₁ yRTx) , bimapR-monotonic-⊑ F₂ R⊑S T⊑U y₂ x₂ (proj₂ yRTx))
+bimapR-monotonic zer R⊑S T⊑U () _ _
+bimapR-monotonic one R⊑S T⊑U tt tt _ = Data.Unit.tt
+bimapR-monotonic arg₁ R⊑S T⊑U (fst b) (fst a) bRa = R⊑S b a bRa
+bimapR-monotonic arg₂ R⊑S T⊑U (snd d) (snd c) dTc = T⊑U d c dTc
+bimapR-monotonic (F₁ ⊕ F₂) R⊑S T⊑U (inj₁ y₁) (inj₁ x₁) yRTx = bimapR-monotonic F₁ R⊑S T⊑U y₁ x₁ yRTx
+bimapR-monotonic (F₁ ⊕ F₂) R⊑S T⊑U (inj₁ y₁) (inj₂ x₂) ()
+bimapR-monotonic (F₁ ⊕ F₂) R⊑S T⊑U (inj₂ y₂) (inj₁ x₁) ()
+bimapR-monotonic (F₁ ⊕ F₂) R⊑S T⊑U (inj₂ y₂) (inj₂ x₂) yRTx = bimapR-monotonic F₂ R⊑S T⊑U y₂ x₂ yRTx
+bimapR-monotonic (F₁ ⊗ F₂) R⊑S T⊑U (y₁ , y₂) (x₁ , x₂) yRTx =
+   (bimapR-monotonic F₁ R⊑S T⊑U y₁ x₁ (proj₁ yRTx) , bimapR-monotonic F₂ R⊑S T⊑U y₂ x₂ (proj₂ yRTx))
 
-bimapR-monotonic-⊒ : (F : PolyF) → ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
-                     {R S : B ← A} {T U : D ← C}
-                    → (R ⊒ S) → (T ⊒ U) → (bimapR F R T ⊒ bimapR F S U)
-bimapR-monotonic-⊒ zer R⊒S T⊒U () _ _
-bimapR-monotonic-⊒ one R⊒S T⊒U tt tt _ = Data.Unit.tt
-bimapR-monotonic-⊒ arg₁ R⊒S T⊒U (fst b) (fst a) bRa = R⊒S b a bRa
-bimapR-monotonic-⊒ arg₂ R⊒S T⊒U (snd d) (snd c) dTc = T⊒U d c dTc
-bimapR-monotonic-⊒ (F₁ ⊕ F₂) R⊒S T⊒U (inj₁ y₁) (inj₁ x₁) yRTx = bimapR-monotonic-⊒ F₁ R⊒S T⊒U y₁ x₁ yRTx
-bimapR-monotonic-⊒ (F₁ ⊕ F₂) R⊒S T⊒U (inj₁ y₁) (inj₂ x₂) ()
-bimapR-monotonic-⊒ (F₁ ⊕ F₂) R⊒S T⊒U (inj₂ y₂) (inj₁ x₁) ()
-bimapR-monotonic-⊒ (F₁ ⊕ F₂) R⊒S T⊒U (inj₂ y₂) (inj₂ x₂) yRTx = bimapR-monotonic-⊒ F₂ R⊒S T⊒U y₂ x₂ yRTx
-bimapR-monotonic-⊒ (F₁ ⊗ F₂) R⊒S T⊒U (y₁ , y₂) (x₁ , x₂) yRTx =
-   (bimapR-monotonic-⊒ F₁ R⊒S T⊒U y₁ x₁ (proj₁ yRTx) , bimapR-monotonic-⊒ F₂ R⊒S T⊒U y₂ x₂ (proj₂ yRTx))
+bimapR-cong : (F : PolyF) → ∀ {i j k l} {A : Set i} {B : Set j}
+              {C : Set k} {D : Set l}
+              {R S : B ← A} {T U : D ← C}
+            → (R ≑ S) → (T ≑ U) → (bimapR F R T ≑ bimapR F S U)
+bimapR-cong F (R⊑S , R⊒S) (T⊑U , T⊒U) =
+  bimapR-monotonic F R⊑S T⊑U , bimapR-monotonic F R⊒S T⊒U
+
+fmapR-functor : (F : PolyF) → ∀ {k l} {A : Set} {B₁ : Set k} {B₂ : Set} {B₃ : Set l}
+                   {R : B₃ ← B₂} {S : B₂ ← B₁}
+                  → fmapR F {A = A} R ○ fmapR F S ≑ fmapR F (R ○ S)
+fmapR-functor F {R = R} {S} =
+  ≑-begin
+   fmapR F R ○ fmapR F S
+  ≑⟨ bimapR-functor F ⟩
+   bimapR _ (idR ○ idR) (R ○ S)
+  ≑⟨ bimapR-cong _ id-idempotent ≑-refl ⟩
+   fmapR F (R ○ S)
+  ≑∎
 
 fmapR-functor-⊑ : (F : PolyF) → ∀ {k l} {A : Set} {B₁ : Set k} {B₂ : Set} {B₃ : Set l}
                    {R : B₃ ← B₂} {S : B₂ ← B₁}
                   → fmapR F {A = A} R ○ fmapR F S ⊑ fmapR F (R ○ S)
-fmapR-functor-⊑ F {R = R} {S} =
-   ⊑-begin
-     fmapR F R ○ fmapR F S
-   ⊑⟨ bimapR-functor-⊑ F ⟩
-     bimapR _ (idR ○ idR) (R ○ S)
-   ⊑⟨ bimapR-monotonic-⊑ F id-idempotent-⊑ ⊑-refl ⟩
-     fmapR F (R ○ S)
-   ⊑∎
- where open import AlgebraicReasoning.Relations
+fmapR-functor-⊑ F = proj₁ (fmapR-functor F)
 
 
 fmapR-functor-⊒ : (F : PolyF) → ∀ {k l} {A : Set} {B₁ : Set k} {B₂ : Set} {B₃ : Set l}
                    {R : B₃ ← B₂} {S : B₂ ← B₁}
                   → fmapR F {A = A} R ○ fmapR F S ⊒ fmapR F (R ○ S)
-fmapR-functor-⊒ F {R = R} {S} =
-   ⊒-begin
-     fmapR F R ○ fmapR F S
-   ⊒⟨ bimapR-functor-⊒ F ⟩
-     bimapR _ (idR ○ idR) (R ○ S)
-   ⊒⟨ bimapR-monotonic-⊒ F id-idempotent-⊒ ⊒-refl ⟩
-     fmapR F (R ○ S)
-   ⊒∎
- where open import AlgebraicReasoning.Relations
+fmapR-functor-⊒ F = proj₂ (fmapR-functor F)
 
 fmapR-monotonic : (F : PolyF) → ∀ {k l} {A : Set} {B : Set k} {C : Set l}
-                     {R S : B ← C}
-                    → (R ⊑ S) → (fmapR F {A = A} R ⊑ fmapR F S)   
-fmapR-monotonic F = bimapR-monotonic-⊑ F ⊑-refl
+                  {R S : B ← C}
+                → (R ⊑ S) → (fmapR F {A = A} R ⊑ fmapR F S)   
+fmapR-monotonic F = bimapR-monotonic F ⊑-refl
 
+fmapR-cong : (F : PolyF) → ∀ {k l} {A : Set} {B : Set k} {C : Set l}
+             {R S : B ← C}
+           → (R ≑ S) → (fmapR F {A = A} R ≑ fmapR F S)
+fmapR-cong F = bimapR-cong F ≑-refl           
+
+bimapR-˘-preservation-⊑ : (F : PolyF) →
+                        ∀ {i j k l} {A₀ : Set i} {A₁ : Set j} {B₀ : Set k} {B₁ : Set l}
+                        → {R : A₀ ← A₁} {S : B₀ ← B₁}
+                        → (bimapR F R S) ˘ ⊑ bimapR F (R ˘) (S ˘)
+bimapR-˘-preservation-⊑ zer () _ _
+bimapR-˘-preservation-⊑ one tt tt _ = Data.Unit.tt
+bimapR-˘-preservation-⊑ arg₁ (fst a) (fst a') a'Ra = a'Ra
+bimapR-˘-preservation-⊑ arg₂ (snd b₁) (snd b₂) b₂Rb₁ = b₂Rb₁
+bimapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₁ x₁) (inj₁ y₁) pf = bimapR-˘-preservation-⊑ F₁ x₁ y₁ pf
+bimapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₁ x₁) (inj₂ y₂) ()
+bimapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₂ x₂) (inj₁ y₁) ()
+bimapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₂ x₂) (inj₂ y₂) pf = bimapR-˘-preservation-⊑ F₂ x₂ y₂ pf
+bimapR-˘-preservation-⊑ (F₁ ⊗ F₂) (x₁ , x₂) (y₁ , y₂) pf =
+  (bimapR-˘-preservation-⊑ F₁ x₁ y₁ (proj₁ pf) , bimapR-˘-preservation-⊑ F₂ x₂ y₂ (proj₂ pf))
+
+bimapR-˘-preservation-⊒ : (F : PolyF) →
+                        ∀ {i j k l} {A₀ : Set i} {A₁ : Set j} {B₀ : Set k} {B₁ : Set l}
+                        → {R : A₀ ← A₁} {S : B₀ ← B₁}
+                        → (bimapR F R S) ˘ ⊒ bimapR F (R ˘) (S ˘)
+bimapR-˘-preservation-⊒ zer () _ _
+bimapR-˘-preservation-⊒ one tt tt _ = Data.Unit.tt
+bimapR-˘-preservation-⊒ arg₁ (fst a₁) (fst a₂) a₂Ra₁ = a₂Ra₁
+bimapR-˘-preservation-⊒ arg₂ (snd b₁) (snd b₂) b₂Sb₁ = b₂Sb₁
+bimapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₁ x₁) (inj₁ y₁) pf = bimapR-˘-preservation-⊒ F₁ x₁ y₁ pf
+bimapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₁ x₁) (inj₂ y₂) ()
+bimapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₂ x₂) (inj₁ y₁) ()
+bimapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₂ x₂) (inj₂ y₂) pf = bimapR-˘-preservation-⊒ F₂ x₂ y₂ pf
+bimapR-˘-preservation-⊒ (F₁ ⊗ F₂) (x₁ , x₂) (y₁ , y₂) pf =
+  (bimapR-˘-preservation-⊒ F₁ x₁ y₁ (proj₁ pf) , bimapR-˘-preservation-⊒ F₂ x₂ y₂ (proj₂ pf))
+
+bimapR-˘-preservation : (F : PolyF) →
+                        ∀ {i j k l} {A₀ : Set i} {A₁ : Set j} {B₀ : Set k} {B₁ : Set l}
+                        → {R : A₀ ← A₁} {S : B₀ ← B₁}
+                        → (bimapR F R S) ˘ ≑ bimapR F (R ˘) (S ˘)
+bimapR-˘-preservation F = bimapR-˘-preservation-⊑ F , bimapR-˘-preservation-⊒ F                   
+
+fmapR-˘-preservation : (F : PolyF) → ∀ {i j} {A : Set} {B : Set i} {C : Set j}
+                     → {R : C ← B}
+                     → (fmapR F R) ˘ ≑ fmapR F {A = A} (R ˘)
+fmapR-˘-preservation F {R = R} = -- fmapR-˘-preservation-⊑ F , fmapR-˘-preservation-⊒ F 
+  ≑-begin
+    (fmapR F R) ˘
+  ≑⟨ bimapR-˘-preservation F ⟩
+    bimapR F (idR ˘) (R ˘)
+  ≑⟨ bimapR-cong F id˘≑id ≑-refl ⟩
+    fmapR F (R ˘)
+  ≑∎
+ where open import Relations.Converse using (id˘≑id)
+  
 fmapR-˘-preservation-⊑ : (F : PolyF) → ∀ {i j} {A : Set} {B : Set i} {C : Set j}
                         → {R : C ← B}
-                        →  (fmapR F R) ˘ ⊑ fmapR F {A = A} (R ˘)
-fmapR-˘-preservation-⊑ zer () _ _
-fmapR-˘-preservation-⊑ one tt tt _ = Data.Unit.tt
-fmapR-˘-preservation-⊑ arg₁ (fst a) (fst .a) refl = refl
-fmapR-˘-preservation-⊑ arg₂ (snd b₁) (snd b₂) b₂Rb₁ = b₂Rb₁
-fmapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₁ x₁) (inj₁ y₁) pf = fmapR-˘-preservation-⊑ F₁ x₁ y₁ pf
-fmapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₁ x₁) (inj₂ y₂) ()
-fmapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₂ x₂) (inj₁ y₁) ()
-fmapR-˘-preservation-⊑ (F₁ ⊕ F₂) (inj₂ x₂) (inj₂ y₂) pf = fmapR-˘-preservation-⊑ F₂ x₂ y₂ pf
-fmapR-˘-preservation-⊑ (F₁ ⊗ F₂) (x₁ , x₂) (y₁ , y₂) pf =
-  (fmapR-˘-preservation-⊑ F₁ x₁ y₁ (proj₁ pf) , fmapR-˘-preservation-⊑ F₂ x₂ y₂ (proj₂ pf))
-
+                        → (fmapR F R) ˘ ⊑ fmapR F {A = A} (R ˘)
+fmapR-˘-preservation-⊑ F = proj₁ (fmapR-˘-preservation F)
 
 fmapR-˘-preservation-⊒ : (F : PolyF) → ∀ {i j} {A : Set} {B : Set i} {C : Set j}
                         → {R : C ← B}
                         →  (fmapR F R) ˘ ⊒ fmapR F {A = A} (R ˘)
-fmapR-˘-preservation-⊒ zer () _ _
-fmapR-˘-preservation-⊒ one tt tt _ = Data.Unit.tt
-fmapR-˘-preservation-⊒ arg₁ (fst a) (fst .a) refl = refl
-fmapR-˘-preservation-⊒ arg₂ (snd b₁) (snd b₂) b₂Rb₁ = b₂Rb₁
-fmapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₁ x₁) (inj₁ y₁) pf = fmapR-˘-preservation-⊒ F₁ x₁ y₁ pf
-fmapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₁ x₁) (inj₂ y₂) ()
-fmapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₂ x₂) (inj₁ y₁) ()
-fmapR-˘-preservation-⊒ (F₁ ⊕ F₂) (inj₂ x₂) (inj₂ y₂) pf = fmapR-˘-preservation-⊒ F₂ x₂ y₂ pf
-fmapR-˘-preservation-⊒ (F₁ ⊗ F₂) (x₁ , x₂) (y₁ , y₂) pf =
-  (fmapR-˘-preservation-⊒ F₁ x₁ y₁ (proj₁ pf) , fmapR-˘-preservation-⊒ F₂ x₂ y₂ (proj₂ pf))
+fmapR-˘-preservation-⊒ F = proj₂ (fmapR-˘-preservation F)                        
+-- conversion between fmap and fmapR
+
+{-
+bimap-bimapR : (F : PolyF) → ∀ {A₁ A₂ B₁ B₂ : Set}
+             → (f : A₁ → A₂) (g : B₁ → B₂)
+             → fun (bimap F f g) ≑ bimapR F (fun f) (fun g)
+bimap-bimapR F f g = {!!}             
+
+-}
 
 -- conversion between fmapP and fmapR
 
@@ -289,3 +332,4 @@ fmap-¿ : (F : PolyF) → ∀ {A : Set} {B : Set}
          → (P : B → Set)
          → (fmapP F {A = A} P) ¿ ≑ fmapR F (P ¿)
 fmap-¿ F P = (fmap-¿-⊑ F P) , (fmap-¿-⊒ F P)
+

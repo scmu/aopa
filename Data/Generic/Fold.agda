@@ -12,9 +12,7 @@ open import Relations
 open import Relations.CompChain
 open import Relations.Coreflexive using (corefl-intro-r; refl-elim-r)
 open import Relations.Function 
-open import AlgebraicReasoning.ExtensionalEquality 
-            using (_≐_; ≐-refl; ≐-sym; ≐-trans; ≐-trans'; 
-                   pre-∘-cong; post-∘-cong)
+open import AlgebraicReasoning.ExtensionalEquality
 open import AlgebraicReasoning.Implications
 open import AlgebraicReasoning.Relations
 

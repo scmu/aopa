@@ -25,7 +25,11 @@ id⊑id˘ : {A : Set} → idR {A = A} ⊑ (idR)˘
 id⊑id˘ a a' = sym 
 
 id˘⊑id : {A : Set} → (idR {A = A})˘ ⊑ idR
-id˘⊑id a a' = sym 
+id˘⊑id a a' = sym
+
+id˘≑id : {A : Set} → (idR {A = A})˘ ≑ idR
+id˘≑id = id˘⊑id , id⊑id˘
+
 
 -- C ≑ C˘ if C ⊑ id
 
@@ -37,6 +41,9 @@ C˘⊑C : {A : Set}{C : A ← A} → C ⊑ idR → C ˘ ⊑ C
 C˘⊑C C⊑id a a' a'Ca with C⊑id a' a a'Ca 
 C˘⊑C C⊑id a .a a'Ca | refl = a'Ca 
 
+C˘≑C : {A : Set}{C : A ← A} → C ⊑ idR → C ˘ ≑ C
+C˘≑C C⊑id = C˘⊑C C⊑id , C⊑C˘ C⊑id
+
 -- ˘-idempotent : R˘˘ ≑ R
 
 ˘-idempotent-⊑ : ∀ {i j k} {A : Set i} {B : Set j} → {R : A ← B ⊣ k} → (R ˘) ˘ ⊑ R
@@ -44,6 +51,9 @@ C˘⊑C C⊑id a .a a'Ca | refl = a'Ca
 
 ˘-idempotent-⊒ : ∀ {i j k} {A : Set i} {B : Set j} → {R : A ← B ⊣ k} → R ⊑ (R ˘) ˘
 ˘-idempotent-⊒ = ˘-universal-⇐ ⊑-refl
+
+˘-idempotent : ∀ {i j k} {A : Set i} {B : Set j} → {R : A ← B ⊣ k} → (R ˘) ˘ ≑ R
+˘-idempotent = ˘-idempotent-⊑ , ˘-idempotent-⊒
 
 -- monotonicity: R ˘ ⊑ S ˘ ⇔ R ⊑ S
 
