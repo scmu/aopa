@@ -284,31 +284,46 @@ mapR-computation-cons-⊒ {R = R} =
     mapR R ○ cons
   ⊑∎
 
-top : ∀ {i j} {A : Set i} {B : Set j} → B ← A
-top _ _ = ⊤
 
 
 {-
   xs ⊴ ys ≡ length xs ≤ length ys
 -}
 _⊴_ : ∀ {A} → List A ← List A
-_⊴_ = foldR ListF [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ]
+_⊴_ = foldR ListF [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ]
 
 _⊵_ : ∀ {A} → List A ← List A
 xs ⊵ ys = ys ⊴ xs
 
-⊴-computation-⊑ : ∀ {A} → _⊴_ {A} ○ fun In ⊑ [ nil , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
+⊴-nil : ∀ {A} {xs : List A} → [] ⊴ xs
+⊴-nil {xs = In (inj₁ tt)} = inj₁ tt , Data.Unit.tt , inj₁ (tt , refl , []-nil)
+⊴-nil {xs = In (inj₂ (fst x , snd xs))} = inj₂ (fst x , snd []) , (refl , ⊴-nil) , inj₂ (_ , refl , inj₁ (_ , refl , []-nil))
+
+⊴-cons : ∀ {A} {x y : A} {xs ys : List A} → xs ⊴ ys → (x ∷ xs) ⊴ (y ∷ ys)
+⊴-cons {xs = xs} xs⊴ys = inj₂ (fst _ , snd xs) , (refl , xs⊴ys) , inj₂ (_ , refl , inj₂ ((fst _ , snd _) , (Data.Unit.tt , refl) , ∷-cons))
+
+⊴-step : ∀ {A} {y : A} {xs ys : List A} → xs ⊴ ys → xs ⊴ (y ∷ ys)
+⊴-step {xs = In (inj₁ tt)} xs⊴ys = ⊴-nil
+⊴-step {xs = In (inj₂ (fst x , snd xs))} {In (inj₁ tt)} (.(inj₁ tt) , Data.Unit.tt , inj₁ (tt , refl , .(inj₂ (fst x , snd xs)) , () , refl))
+⊴-step {xs = In (inj₂ (fst x , snd xs))} {In (inj₁ tt)} (.(inj₂ proj₃) , () , inj₂ (proj₃ , refl , proj₅))
+⊴-step {xs = In (inj₂ (fst x , snd xs))} {In (inj₂ (fst y' , snd ys))} (.(inj₁ tt) , () , inj₁ (tt , refl , proj₄))
+⊴-step {xs = In (inj₂ (fst x , snd xs))} {In (inj₂ (fst .y' , snd ys))} (.(inj₂ (fst y' , snd x₂)) , (refl , xs⊴ys) , inj₂ ((fst y' , snd x₂) , refl , inj₁ (tt , refl , .(inj₁ tt) , refl , ())))
+⊴-step {xs = In (inj₂ (fst .x , snd .xs))} {In (inj₂ (fst .y , snd ys))} (.(inj₂ (fst y , snd xs)) , (refl , xs⊴ys) , inj₂ ((fst y , snd xs) , refl , inj₂ ((fst x , snd .xs) , (Data.Unit.tt , refl) , .(inj₂ (fst x , snd xs)) , refl , refl)))
+  = (inj₂ (fst _ , snd xs) , (refl , ⊴-step xs⊴ys) , inj₂ (_ , refl , inj₂ (_ , (Data.Unit.tt , refl) , ∷-cons)))
+
+
+⊴-computation-⊑ : ∀ {A} → _⊴_ {A} ○ fun In ⊑ [ nil , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
 ⊴-computation-⊑ =
   ⊑-begin
     _⊴_ ○ fun In
-  ⊑⟨ foldR-computation-⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ] ⟩
-    [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ] ○ bimapR ListF idR _⊴_
+  ⊑⟨ foldR-computation-⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ] ⟩
+    [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ] ○ bimapR ListF idR _⊴_
   ⊑⟨ [,]-⊕-absorption-⊑ ⟩
-    [ nil ○ bimapR one idR _⊴_ , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
+    [ nil ○ bimapR one idR _⊴_ , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
   ⊑⟨ [,]-monotonic (○-monotonic-r bimapR-one⊑idR) ⊑-refl ⟩
-    [ nil ○ idR , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
+    [ nil ○ idR , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
   ⊑⟨ [,]-monotonic id-intro-r ⊑-refl ⟩
-    [ nil , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
+    [ nil , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
   ⊑∎
 
 ⊴-computation-nil-⊑ : ∀ {A} → _⊴_ {A} ○ nil ⊑ nil
@@ -323,79 +338,82 @@ xs ⊵ ys = ys ⊴ xs
     nil
   ⊑∎
 
-⊴-computation-cons-⊑ : ∀ {A} → _⊴_ {A} ○ cons ⊑ ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_
+⊴-computation-cons-⊑ : ∀ {A} → _⊴_ {A} ○ cons ⊑ ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_
 ⊴-computation-cons-⊑ =
   ⊑-begin
     _⊴_ ○ fun In ○ fun inj₂
   ⊑⟨ ○-assocl ⟩
     (_⊴_ ○ fun In) ○ fun inj₂
   ⊑⟨ ○-monotonic-l ⊴-computation-⊑ ⟩
-    [ _ , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ] ○ fun inj₂
+    [ _ , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ] ○ fun inj₂
   ⊑⟨ [,]-universal-r-⊑ ⟩
-    ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_
+    ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_
   ⊑∎
 
 ⊴-refl : ∀ {A} {xs ys : List A} → xs ≡ ys → xs ⊴ ys
 ⊴-refl {xs = In (inj₁ tt)} refl = (inj₁ tt , Data.Unit.tt , inj₁ (tt , refl , []-nil))
 ⊴-refl {xs = In (inj₂ (fst x , snd xs))} refl = (inj₂ (fst x , snd xs) , (refl , (⊴-refl refl)) , inj₂ (_ , refl , inj₂ (_ , (Data.Unit.tt , refl) , ∷-cons)))
 
+⊴-refl' : ∀ {A} {xs : List A}→ xs ⊴ xs
+⊴-refl' = ⊴-refl refl
+
 ⊴-trans : ∀ {A} {xs ys zs : List A} → xs ⊴ ys → ys ⊴ zs → xs ⊴ zs
 ⊴-trans {xs = xs}{ys}{zs} xs⊴ys ys⊴zs = foldR-fusion-⊑ ListF _⊴_ _ _ fuse-cond xs zs (ys , ys⊴zs , xs⊴ys)
   where
-    fuse-cond : _⊴_ ○ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ] ⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ] ○ bimapR ListF idR _⊴_
+    fuse-cond : _⊴_ ○ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ] ⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ] ○ bimapR ListF idR _⊴_
     fuse-cond =
       ⊑-begin
-        _⊴_ ○ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ]
+        _⊴_ ○ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ]
       ⊑⟨ ○-[,]-distr-⊑ ⟩
-        [ _⊴_ ○ nil , _⊴_ ○ ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ]
+        [ _⊴_ ○ nil , _⊴_ ○ ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ]
       ⊑⟨ [,]-monotonic ⊴-computation-nil-⊑ ○-⊔-distr-l-⊑ ⟩
-        [ nil , (_⊴_ ○ (nil ○ !)) ⊔ (_⊴_ ○ cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ]
+        [ nil , (_⊴_ ○ (nil ○ !)) ⊔ (_⊴_ ○ cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ○-assocl ○-assocl) ⟩
-        [ nil , ((_⊴_ ○ nil) ○ !) ⊔ ((_⊴_ ○ cons) ○ bimapR (arg₁ ⊗ arg₂) top idR) ]
+        [ nil , ((_⊴_ ○ nil) ○ !) ⊔ ((_⊴_ ○ cons) ○ bimapR (arg₁ ⊗ arg₂) Π idR) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic (○-monotonic-l ⊴-computation-nil-⊑) (○-monotonic-l ⊴-computation-cons-⊑)) ⟩
-        [ nil , (nil ○ !) ⊔ ((((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ○ bimapR (arg₁ ⊗ arg₂) top idR) ]
+        [ nil , (nil ○ !) ⊔ ((((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ○ bimapR (arg₁ ⊗ arg₂) Π idR) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl ○-assocr) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ○ bimapR (arg₁ ⊗ arg₂) top idR) ]
+          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ○ bimapR (arg₁ ⊗ arg₂) Π idR) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-functor-⊑ (arg₁ ⊗ arg₂)))) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) (idR ○ top) (_⊴_ ○ idR)) ]
+          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) (idR ○ Π) (_⊴_ ○ idR)) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic (arg₁ ⊗ arg₂) id-intro-l id-intro-r))) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) top _⊴_) ]
+          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) Π _⊴_) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic (arg₁ ⊗ arg₂) id-elim-r id-elim-l))) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) (top ○ idR) (idR ○ _⊴_)) ]
+          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) (Π ○ idR) (idR ○ _⊴_)) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-functor-⊒ (arg₁ ⊗ arg₂)))) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) top idR ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
+          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) Π idR ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl ○-assocl) ⟩
         [ nil ,
-          (nil ○ !) ⊔ ((((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) top idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
+          (nil ○ !) ⊔ ((((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) Π idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-l ○-⊔-distr-r-⊑)) ⟩
         [ nil ,
-          (nil ○ !) ⊔ ((((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) top idR) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
+          (nil ○ !) ⊔ ((((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) Π idR) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-l (⊔-monotonic ○-assocr ○-assocr))) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ ! ○ bimapR (arg₁ ⊗ arg₂) top idR) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
+          (nil ○ !) ⊔ (((nil ○ ! ○ bimapR (arg₁ ⊗ arg₂) Π idR) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-l (⊔-monotonic (○-monotonic-r !-fusion-⊑) (○-monotonic-r (bimapR-functor-⊑ (arg₁ ⊗ arg₂)))))) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (top ○ top) (idR ○ idR))) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
+          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (Π ○ Π) (idR ○ idR))) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-l (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic (arg₁ ⊗ arg₂) (λ _ _ _ → Data.Unit.tt) id-idempotent-⊑))))) ⟩
         [ nil ,
-          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
+          (nil ○ !) ⊔ (((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic (○-monotonic-r (!-fusion-⊒ bimap-entire)) ○-⊔-distr-r-⊑) ⟩
         [ nil ,
-          (nil ○ ! ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ (((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_)) ]
+          (nil ○ ! ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ (((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_)) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ○-assocl ⊑-refl) ⟩
         [ nil ,
-          ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ (((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_)) ]
+          ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ (((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_)) ]
       ⊑⟨ [,]-monotonic id-elim-r (⊔-universal-⇐ ((λ _ _ → inj₁) , ⊑-refl)) ⟩
-        [ nil ○ idR , ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
+        [ nil ○ idR , ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ⊔ ((cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_) ]
       ⊑⟨ [,]-monotonic (○-monotonic-r bimapR-one⊒idR) ○-⊔-distr-r-⊒ ⟩
-        [ nil ○ bimapR one idR _⊴_ , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
+        [ nil ○ bimapR one idR _⊴_ , ((nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR)) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_ ]
       ⊑⟨ [,]-⊕-absorption-⊒ ⟩
-        [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) top idR) ] ○ bimapR ListF idR _⊴_
+        [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) Π idR) ] ○ bimapR ListF idR _⊴_
       ⊑∎
      where
        bimap-entire : idR ⊑ (bimapR (arg₁ ⊗ arg₂) idR _⊴_ ˘) ○ bimapR (arg₁ ⊗ arg₂) idR _⊴_
