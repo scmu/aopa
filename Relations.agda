@@ -3,6 +3,7 @@
 module Relations where
 
 open import Level renaming (_⊔_ to _⊔ℓ_)
+open import Data.Unit using (⊤)
 open import Data.Product  using (Σ; ∃; _×_; _,_; proj₁; proj₂)
 open import Data.Sum      using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_; id)
@@ -258,7 +259,10 @@ id-elim-r : ∀ {i j} {A : Set i} {B : Set j} {R : B ← A ⊣ i} → R ○ idR 
 id-elim-r b a bRa = (a , refl , bRa) 
 
 id-elim-l : ∀ {i j} {A : Set i} {B : Set j} {R : B ← A ⊣ j} → idR ○ R ⊒ R 
-id-elim-l b a bRa = (b , bRa , refl) 
+id-elim-l b a bRa = (b , bRa , refl)
+
+Π : ∀ {i j} {A : Set i} {B : Set j} → B ← A
+Π b a = ⊤
 
 -- Power Transpose
 
@@ -310,3 +314,4 @@ _⨉_ : ∀ {i j k l m n} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
 ⟨_,_⟩ : ∀ {i j k m n} {A : Set i} {B : Set j} {C : Set k}
      → (B ← A ⊣ m) → (C ← A ⊣ n) → ((B × C) ← A)
 ⟨ R , S ⟩ (b , c) a = (R b a × S c a)      
+
