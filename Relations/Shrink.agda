@@ -145,7 +145,7 @@ S↾RS˘⊑R = ↾-universal-⇒₂ ⊑-refl
 -- introduce solutions "better" than those given by S. That is,  
 -- when S ○ T ˘ ⊑ R.
 
-↾-gen-monotonic :  ∀ {i} {A : Set i} {B : Set i} {C : Set i}
+↾-gen-monotonic :  ∀ {i} {A : Set i} {B : Set i}
    → (S T : A ← B) (R : A ← A)
    → (S ⊑ T) → S ○ T ˘ ⊑ R
    → S ↾ R ⊑ T ↾ R
@@ -167,6 +167,21 @@ S↾RS˘⊑R = ↾-universal-⇒₂ ⊑-refl
                    ⇐⟨ ○-monotonic-l ⟩
                     S ↾ R ⊑ S
                    ⇐∎ ) S↾R⊑S
+
+↾-subst : ∀ {i} {A B : Set i}
+        → (S T : A ← B) (R : A ← A)
+        → (S ≑ T) → S ↾ R ≑ T ↾ R
+↾-subst S T R (S⊑T , T⊑S) =
+  ≑-begin
+    S ↾ R
+  ≑⟨ ≑-refl ⟩
+    S ⊓ (R / (S ˘))
+  ≑⟨ (⊓-monotonic S⊑T (/-anti-monotonic (˘-monotonic-⇐ T⊑S))) ,
+     (⊓-monotonic T⊑S (/-anti-monotonic (˘-monotonic-⇐ S⊑T))) ⟩
+    T ⊓ (R / (T ˘))
+  ≑⟨ ≑-refl ⟩
+    T ↾ R
+  ≑∎
 
 -- Relationship to Galois connection.
 

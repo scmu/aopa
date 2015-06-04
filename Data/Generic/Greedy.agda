@@ -91,7 +91,7 @@ greedy-ana-cxt {F = F}{S}{T}{R}{Q} isPre S-simple mono greedy =
        S ○ fmapR F ((⦇ S ⦈ ○ ⦇ T ⦈ ˘) ↾ R) ○ T ˘
      ⊑⟨ ○-monotonic-r
           (○-monotonic-l
-           (bimapR-monotonic-⊑ F ⊑-refl (↾-universal-⇒₁ {R = R} ⊑-refl))) ⟩
+           (bimapR-monotonic F ⊑-refl (↾-universal-⇒₁ {R = R} ⊑-refl))) ⟩
        S ○ fmapR F (⦇ S ⦈ ○ ⦇ T ⦈ ˘) ○ T ˘
      ⊑⟨ proj₁ hylo-lpfp ⟩
        ⦇ S ⦈ ○ ⦇ T ⦈ ˘
