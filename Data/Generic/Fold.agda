@@ -385,6 +385,12 @@ mutual
     mapFoldR-univ-⇐-⊒ F G₀ S R hom x₀ x₁ bm₀ ,
     mapFoldR-univ-⇐-⊒ F G₁ S R hom y₀ y₁ bm₁
 
+foldR-universal-⇐-≑ : (F : PolyF) → {A B : Set}
+                     → (S : B ← μ F A) → (R : B ← ⟦ F ⟧ A B)
+                     → (S ○ fun In ≑ R ○ fmapR F S)
+                     → (S ≑ ⦇ R ⦈)
+foldR-universal-⇐-≑ F S R (SIn⊑RFS , RFS⊑SIn) =
+ (foldR-universal-⇐-⊑ F S R SIn⊑RFS) , (foldR-universal-⇐-⊒ F S R RFS⊑SIn)
 
 foldR-monotonic : (F : PolyF) → {A B : Set}
                 → (R S : B ← ⟦ F ⟧ A B)
@@ -399,6 +405,31 @@ foldR-monotonic F R S =
   ⇐⟨ ○-monotonic-l ⟩
     R ⊑ S
   ⇐∎
+
+foldR-fun : (F : PolyF) → {A B : Set}
+          → (f : ⟦ F ⟧ A B → B)
+          → fun (fold F f) ≑ ⦇ fun f ⦈
+foldR-fun F f = foldR-universal-⇐-≑ F (fun (fold F f)) (fun f) cond
+  where
+   postulate
+     cond : fun (fold F f) ○ fun In ≑ fun f ○ fmapR F (fun (fold F f))
+    {- use fold-computation,
+       conversion between ≐ and ≑ (to be defined in Relations?)
+       fun distributes into ∘, etc
+    -}
+
+foldR-fold : (F : PolyF) → {A B : Set}
+           → (f : ⟦ F ⟧ A B → B) → (R : B ← ⟦ F ⟧ A B)
+           → (fun f ⊑ R)
+           → fun (fold F f) ⊑ ⦇ R ⦈
+foldR-fold F f R f⊑R =
+   ⊑-begin
+     fun (fold F f)
+   ⊑⟨ {!   !} ⟩
+     ⦇ fun f ⦈
+   ⊑⟨ {!   !} ⟩
+     ⦇ R ⦈
+   ⊑∎
 
 mutual
   idR-foldR-⊑ : (F : PolyF) → ∀ {A} → idR ⊑ foldR F {A} (fun In)
