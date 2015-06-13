@@ -2,10 +2,12 @@ module Examples.GC.TakeWhile where
 
 open import Data.Empty
 open import Data.Unit using (⊤)
+open import Data.Bool
 open import Data.Product using (_×_; _,_; uncurry; ∃; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Function
 open import Relation.Binary
+open import Relation.Binary.PropositionalEquality using (inspect) renaming ([_] to [_]')
 open import Level renaming (_⊔_ to _⊔ℓ_)
 open import Sets
 open import Relations
@@ -13,9 +15,10 @@ open import Relations.Factor
 open import Relations.Shrink
 open import Relations.Galois
 open import Relations.Converse
-open import Relations.Coreflexive using (_¿)
+open import Relations.Coreflexive
 open import Relations.CompChain
 open import Data.Generic
+open import Data.Generic.Greedy
 open import AlgebraicReasoning.Relations
 open import AlgebraicReasoning.Implications
 open import Examples.GC.Relations
@@ -29,7 +32,7 @@ map○≼-foldR-⊑ {p = p} =
      (mapR (p ¿) ○ _≼_) ○ fun In ⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ] ○ bimapR ListF idR (mapR (p ¿) ○ _≼_)
    ⇐⟨ ⊑-trans ○-assocr ⟩
      mapR (p ¿) ○ _≼_ ○ fun In ⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ] ○ bimapR ListF idR (mapR (p ¿) ○ _≼_)
-   ⇐⟨ ⊑-trans (○-monotonic-r (foldR-computation-⊑ ListF [ nil , (nil ○ !) ⊔ cons ])) ⟩
+   ⇐⟨ ⊑-trans (○-monotonic-r (foldR-computation-⊑ [ nil , (nil ○ !) ⊔ cons ])) ⟩
      mapR (p ¿) ○ [ nil , (nil ○ !) ⊔ cons ] ○ bimapR ListF idR _≼_ ⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ] ○ bimapR ListF idR (mapR (p ¿) ○ _≼_)
    ⇐∎) cond
  where
@@ -56,7 +59,7 @@ map○≼-foldR-⊑ {p = p} =
        [ nil , ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _≼_) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) (mapR (p ¿)) ○ bimapR (arg₁ ⊗ arg₂) idR _≼_) ]
      ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-functor-⊑ (arg₁ ⊗ arg₂)))) ⟩
        [ nil , ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _≼_) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ¿) ○ idR) (mapR (p ¿) ○ _≼_)) ]
-     ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic-⊑ (arg₁ ⊗ arg₂) ⊑-refl id-elim-l))) ⟩
+     ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic (arg₁ ⊗ arg₂) ⊑-refl id-elim-l))) ⟩
        [ nil , ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _≼_) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ¿) ○ idR) (idR ○ (mapR (p ¿) ○ _≼_))) ]
      ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-functor-⊒ (arg₁ ⊗ arg₂)))) ⟩
        [ nil , ((nil ○ !) ○ bimapR (arg₁ ⊗ arg₂) idR _≼_) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR ○ bimapR (arg₁ ⊗ arg₂) idR (mapR (p ¿) ○ _≼_)) ]
@@ -93,7 +96,7 @@ map○≼-foldR-⊒ {p = p} = foldR-fusion-⊒ ListF (mapR (p ¿)) [ nil , (nil 
         [ nil , (nil ○ ! ○ bimapR (arg₁ ⊗ arg₂) idR (mapR (p ¿))) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR ○ bimapR (arg₁ ⊗ arg₂) idR (mapR (p ¿))) ]
       ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic (○-monotonic-r !-fusion-⊑) (○-monotonic-r (bimapR-functor-⊑ (arg₁ ⊗ arg₂)))) ⟩
         [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ¿) ○ idR) (idR ○ (mapR (p ¿)))) ]
-      ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic-⊑ (arg₁ ⊗ arg₂) id-intro-r id-intro-l))) ⟩
+      ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic (arg₁ ⊗ arg₂) id-intro-r id-intro-l))) ⟩
         [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) (mapR (p ¿))) ]
       ⊑⟨ [,]-monotonic mapR-computation-nil-⊒ (⊔-monotonic (⇦-mono-l (nil ‥) (mapR (p ¿) ● nil ‥) mapR-computation-nil-⊒) mapR-computation-cons-⊒) ⟩
         [ mapR (p ¿) ○ nil , (mapR (p ¿) ○ nil ○ !) ⊔ (mapR (p ¿) ○ cons) ]
@@ -117,9 +120,9 @@ mono-cond p =
     [ nil , (nil ○ ! ○ bimapR (arg₁ ⊗ arg₂) idR _≼_) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR ○ bimapR (arg₁ ⊗ arg₂) idR _≼_) ]
   ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic (○-monotonic-r !-fusion-⊑) (○-monotonic-r (bimapR-functor-⊑ (arg₁ ⊗ arg₂)))) ⟩
     [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ¿) ○ idR) (idR ○ _≼_)) ]
-  ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic-⊑ (arg₁ ⊗ arg₂) id-intro-r id-intro-l))) ⟩
+  ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic (arg₁ ⊗ arg₂) id-intro-r id-intro-l))) ⟩
     [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) _≼_) ]
-  ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic-⊑ (arg₁ ⊗ arg₂) id-elim-l id-elim-r))) ⟩
+  ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-monotonic (arg₁ ⊗ arg₂) id-elim-l id-elim-r))) ⟩
     [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (idR ○ p ¿) (_≼_ ○ idR)) ]
   ⊑⟨ [,]-monotonic ⊑-refl (⊔-monotonic ⊑-refl (○-monotonic-r (bimapR-functor-⊒ (arg₁ ⊗ arg₂)))) ⟩
     [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) idR _≼_ ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ]
@@ -142,18 +145,36 @@ mono-cond p =
       ⇐∎) ≼-computation-cons-⊒
 
 
-takeWhile-der : {A : Set} → (p : ℙ A) → foldR ListF ([ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ] ↾ _≽_) ⊑ (mapR (p ¿) ○ _≼_) ↾ _≽_
-takeWhile-der p =
-  ⊒-begin
-    (mapR (p ¿) ○ _≼_) ↾ _≽_
-  ⊒⟨ ⊒-refl ⟩
-    (mapR (p ¿) ○ _≼_) ⊓ (_≽_ / (mapR (p ¿) ○ _≼_) ˘)
-  ⊒⟨ ⊓-monotonic map○≼-foldR-⊒ ⊑-refl ⟩
-    (foldR ListF [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ]) ⊓ (_≽_ / (mapR (p ¿) ○ _≼_) ˘)
-  ⊒⟨ ⊓-monotonic ⊑-refl (/-anti-monotonic (˘-monotonic-⇐ map○≼-foldR-⊑)) ⟩
-    (foldR ListF [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ]) ⊓ (_≽_ / (foldR ListF [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ]) ˘)
-  ⊒⟨ ⊒-refl ⟩
-    (foldR ListF [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ]) ↾ _≽_
-  ⊒⟨ foldR-↾-absorption ListF ≽-isPreorder (mono-cond p) ⟩
-    foldR ListF ([ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) (p ¿) idR) ] ↾ _≽_)
-  ⊒∎
+takeWhile-der : {A : Set} → (p : A → Bool) → ∃ (λ f → fun f ⊑ (mapR ((p ♯) ¿) ○ _≼_) ↾ _≽_)
+takeWhile-der {A} p = _ ,
+  (⊒-begin
+     (mapR ((p ♯) ¿) ○ _≼_) ↾ _≽_
+   ⊒⟨ proj₂ (↾-subst (mapR ((p ♯) ¿) ○ _≼_) (⦇ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ♯) ¿) idR) ] ⦈) _≽_ (map○≼-foldR-⊑ , map○≼-foldR-⊒)) ⟩
+     (⦇ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ♯) ¿) idR) ] ⦈) ↾ _≽_
+   ⊒⟨ greedy-cata ListF ≽-isPreorder (mono-cond (p ♯)) ⟩
+     ⦇ ([ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ♯) ¿) idR) ] ↾ _≽_) ⦈
+   ⊒⟨ foldR-fold ListF pcons ([ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ♯) ¿) idR) ] ↾ _≽_) pcons⊑S↾≽ ⟩
+     fun (fold ListF pcons)
+   ⊒∎)
+ where
+   pcons : ⟦ ListF ⟧ A (List A) → List A
+   pcons (inj₁ tt) = []
+   pcons (inj₂ (fst x , snd xs)) with p x
+   ... | true = x ∷ xs
+   ... | false = []
+
+
+   pcons⊑S : fun pcons ⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ♯) ¿) idR) ]
+   pcons⊑S .(In (inj₁ tt)) (inj₁ tt) refl = inj₁ (tt , refl , []-nil)
+   pcons⊑S ys (inj₂ (fst x , snd xs)) eq with p x | inspect p x
+   pcons⊑S ._ (inj₂ (fst x , snd xs)) refl | true | [ px≡true ]' = inj₂ (_ , refl , inj₂ ((fst x , snd xs) , ((refl , px≡true) , refl) , ∷-cons))
+   pcons⊑S ._ (inj₂ (fst x , snd xs)) refl | false | [ _ ]' = inj₂ (_ , refl , inj₁ (tt , refl , []-nil))
+
+   pconsS˘⊒≽ : fun pcons ○ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ♯) ¿) idR) ] ˘ ⊑ _≽_
+   pconsS˘⊒≽ .(In (inj₁ tt)) .(In (inj₁ tt)) (.(inj₁ tt) , inj₁ (tt , refl , .(inj₁ tt) , refl , refl) , refl) = ≽-refl refl
+   pconsS˘⊒≽ ys .(In (inj₁ tt)) (.(inj₂ (fst x , snd xs)) , inj₂ ((fst x , snd xs) , refl , inj₁ (tt , refl , .(inj₁ tt) , refl , refl)) , eq) = ≼-universal₁
+   pconsS˘⊒≽ ._ .(In (inj₂ (fst x , snd xs))) (.(inj₂ (fst x , snd xs)) , inj₂ ((fst x , snd xs) , refl , inj₂ ((fst .x , snd .xs) , ((refl , px≡true) , refl) , .(inj₂ (fst x , snd xs)) , refl , refl)) , refl) rewrite px≡true = ≽-refl refl
+
+
+   pcons⊑S↾≽ : fun pcons ⊑ [ nil , (nil ○ !) ⊔ (cons ○ bimapR (arg₁ ⊗ arg₂) ((p ♯) ¿) idR) ] ↾ _≽_
+   pcons⊑S↾≽ = ↾-universal-⇐ (pcons⊑S , pconsS˘⊒≽)

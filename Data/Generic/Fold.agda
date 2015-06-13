@@ -425,9 +425,9 @@ foldR-fold : (F : PolyF) → {A B : Set}
 foldR-fold F f R f⊑R =
    ⊑-begin
      fun (fold F f)
-   ⊑⟨ {!   !} ⟩
+   ⊑⟨ proj₁ (foldR-fun F f) ⟩
      ⦇ fun f ⦈
-   ⊑⟨ {!   !} ⟩
+   ⊑⟨ foldR-monotonic F (fun f) R f⊑R ⟩
      ⦇ R ⦈
    ⊑∎
 

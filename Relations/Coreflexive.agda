@@ -1,6 +1,7 @@
 module Relations.Coreflexive where
 
 open import Level
+open import Data.Bool
 open import Data.Product
 open import Sets
 open import Relations
@@ -10,6 +11,9 @@ open import AlgebraicReasoning.Relations
 
 _¿ : ∀ {i} {A : Set i} → ℙ A → (A ← A)
 (p ¿) b a = (a ≡ b) × p a
+
+_♯ : {A : Set} → (A → Bool) → ℙ A
+p ♯ = λ a → p a ≡ true
 
 set-corefl⊑idR : ∀ {i} {A : Set i} → (s : ℙ A) → s ¿ ⊑ idR
 set-corefl⊑idR s b a (a≡b , bRa) = a≡b
