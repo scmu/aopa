@@ -15,13 +15,10 @@ open import Relations.Converse
 open import Relations.CompChain
 open import Relations.Poset
 open import FixedPoint
-open import AlgebraicReasoning.ExtensionalEquality 
-            using (_≐_; ≐-refl; ≐-sym; ≐-trans; ≐-trans'; 
-                   pre-∘-cong; post-∘-cong)
+open import AlgebraicReasoning.ExtensionalEquality
 open import AlgebraicReasoning.Implications
 open import AlgebraicReasoning.Relations
 
 open import Data.Generic.Core public
 open import Data.Generic.Fold public
 open import Data.Generic.Hylo public
-
