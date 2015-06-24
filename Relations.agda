@@ -312,3 +312,17 @@ _⨉_ : ∀ {i j k l m n} {A : Set i} {B : Set j} {C : Set k} {D : Set l}
 ⟨_,_⟩ : ∀ {i j k m n} {A : Set i} {B : Set j} {C : Set k}
      → (B ← A ⊣ m) → (C ← A ⊣ n) → ((B × C) ← A)
 ⟨ R , S ⟩ (b , c) a = (R b a × S c a)
+
+-- Coproducts
+
+[_,_] : ∀ {i k} {A B : Set i} {B : Set i} {C : Set k}
+      → (C ← A ⊣ i) → (C ← B ⊣ i) → (C ← A ⊎ B ⊣ i)
+[ R , S ] = (R ○ (fun inj₁ ˘)) ⊔ (S ○ (fun inj₂ ˘))
+
+{-
+[_,_] : ∀ {i j k m} {A : Set i} {B : Set j} {C : Set k}
+      → (C ← A ⊣ m) → (C ← B ⊣ m) → (C ← A ⊎ B ⊣ m)
+[ R , S ] c (inj₁ a) = R c a
+[ R , S ] c (inj₂ b) = S c b
+-}
+

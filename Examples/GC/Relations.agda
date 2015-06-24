@@ -5,47 +5,10 @@ open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Sets
 open import Relations
+open import Relations.Coproduct
 open import Data.Generic
 open import AlgebraicReasoning.Relations
 
-
-[_,_] : ∀ {i} {A B C : Set i}
-        → (C ← A ⊣ i) → (C ← B ⊣ i) → (C ← A ⊎ B ⊣ i)
-[ R , S ] = (R ○ (fun inj₁ ˘)) ⊔ (S ○ (fun inj₂ ˘))
-
-
-[,]-universal-l-⊑ : ∀ {i} {A B C : Set i} {R : C ← A} {S : C ← B}
-                  → [ R , S ] ○ fun inj₁ ⊑ R
-[,]-universal-l-⊑ c a (.(inj₁ a) , refl , inj₁ (.a , refl , cRa)) = cRa
-[,]-universal-l-⊑ c a (.(inj₁ a) , refl , inj₂ (_ , () , _))
-
-[,]-universal-l-⊒ : ∀ {i} {A B C : Set i} {R : C ← A} {S : C ← B}
-                  → [ R , S ] ○ fun inj₁ ⊒ R
-[,]-universal-l-⊒ c a cRa = (inj₁ a , refl , inj₁ (a , refl , cRa))
-
-[,]-universal-r-⊑ : ∀ {i} {A B C : Set i} {R : C ← A} {S : C ← B}
-                  → [ R , S ] ○ fun inj₂ ⊑ S
-[,]-universal-r-⊑ c b (.(inj₂ b) , refl , inj₁ (_ , () , _))
-[,]-universal-r-⊑ c b (.(inj₂ b) , refl , inj₂ (.b , refl , cSb)) = cSb
-
-[,]-universal-r-⊒ : ∀ {i} {A B C : Set i} {R : C ← A} {S : C ← B}
-                  → [ R , S ] ○ fun inj₂ ⊒ S
-[,]-universal-r-⊒ c b cSb = (inj₂ b , refl , inj₂ (b , refl , cSb))
-
-
-[,]-monotonic : ∀ {i} {A B C : Set i}
-                  {R T : C ← A} {S U : C ← B}
-                → R ⊑ T → S ⊑ U → [ R , S ] ⊑ [ T , U ]
-[,]-monotonic {R = R} {T} {S} {U} R⊑T S⊑U =
-   ⊑-begin
-     [ R , S ]
-   ⊑⟨ ⊑-refl ⟩
-     (R ○ (fun inj₁ ˘)) ⊔ (S ○ (fun inj₂ ˘))
-   ⊑⟨ ⊔-monotonic (○-monotonic-l R⊑T) (○-monotonic-l S⊑U) ⟩
-     (T ○ (fun inj₁ ˘)) ⊔ (U ○ (fun inj₂ ˘))
-   ⊑⟨ ⊑-refl ⟩
-     [ T , U ]
-   ⊑∎
 
 [,]-⊕-absorption-⊑ : {F₁ F₂ : PolyF} {A B C D E : Set} {R : E ← ⟦ F₁ ⟧ C D} {S : E ← ⟦ F₂ ⟧ C D} {T : C ← A} {U : D ← B}
                     → [ R , S ] ○ bimapR (F₁ ⊕ F₂) T U ⊑ [ R ○ bimapR F₁ T U , S ○ bimapR F₂ T U ]
@@ -101,7 +64,7 @@ open import AlgebraicReasoning.Relations
    F₂inj₂˘⊑inj₂˘F₁F₂ : bimapR F₂ T U ○ (fun inj₂ ˘) ⊑ (fun inj₂ ˘) ○ bimapR (F₁ ⊕ F₂) T U
    F₂inj₂˘⊑inj₂˘F₁F₂ x (inj₁ y) (_ , () , _)
    F₂inj₂˘⊑inj₂˘F₁F₂ x (inj₂ y) (.y , refl , bmp) = (inj₂ x , bmp , refl)
-  
+
 ○-[,]-distr-⊑ : ∀ {i} {A B C D : Set i} {R : D ← C ⊣ i} {S : C ← A} {T : C ← B}
                 → R ○ [ S , T ] ⊑ [ R ○ S , R ○ T ]
 ○-[,]-distr-⊑ {R = R}{S}{T} =
