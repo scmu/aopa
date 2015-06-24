@@ -15,10 +15,11 @@ open import Data.List     using (List; _∷_; []; foldr)
 
 open Sets
   using (refl; sym; cong)
+open import Relations.Function
 open import AlgebraicReasoning.Equality 
-  using (     ≡-begin_; _≡⟨_⟩_; _≡∎)
+  using (≡-begin_; _≡⟨_⟩_; _≡∎)
 open import AlgebraicReasoning.ExtensionalEquality 
-  using (_≐_; ≐-begin_; _≐⟨_⟩_; _≐∎; ≐-refl; ≐-sym)
+  using (≐-begin_; _≐⟨_⟩_; _≐∎)
 
 open import Examples.MSS.ListProperties using (foldr-fusion)
 open import Examples.MSS.List+ 

@@ -6,7 +6,7 @@ open import Data.Integer
 open import Examples.MSS.IntRNG
 import Examples.MSS.Derivation 
 
-module MSSDer = Examples.MSS.Derivation (pos 0)
+module MSSDer = Examples.MSS.Derivation (+ 0)
                   _+_ _↑_ ↑assoc +distr↑
 open MSSDer
 

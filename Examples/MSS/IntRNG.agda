@@ -1,21 +1,22 @@
--- Note: uses Agda repository built-in library, not the Agda standard lib.
+module Examples.MSS.IntRNG where
 
-module IntRNG where
-
-open import Logic.Base
-open import Logic.Identity
-open import Logic.ChainReasoning
 open import Data.Bool
-open import Data.Nat using (Nat; suc; zero)
+open import Data.Nat using (ℕ; suc; zero)
                   renaming ( _<_  to _<'_ )
 open import Data.Integer
+open import Relation.Nullary
+open import Relation.Binary.PropositionalEquality
 
-module ChainR = Logic.ChainReasoning.Poly.Homogenous _≡_ (\x -> refl) (\x y z -> trans)
-open ChainR
 
-_↑_ : Int -> Int -> Int
-a ↑ b = (a < b) => b ! a
+-- module ChainR = Logic.ChainReasoning.Poly.Homogenous _≡_ (\x -> refl) (\x y z -> trans)
+--open ChainR
 
+_↑_ : ℤ → ℤ → ℤ
+a ↑ b with b ≤? a
+a ↑ b | yes p = a
+a ↑ b | no ¬p = b
+
+{-
 lemmaT : {A : Set}{cond : Bool}{x y : A} ->
           cond ≡ true -> if cond then x else y ≡ x
 lemmaT refl = refl
@@ -27,11 +28,14 @@ lemmaF refl = refl
 dec : (b : Bool) -> (b ≡ true) \/ (b ≡ false)
 dec true = \/-IL refl
 dec false = \/-IR refl
+-}
 
 -- JK: unavoidable partiality?
-↑assoc : (a : Int) -> (b : Int) -> (c : Int) ->
-           ((a ↑ b) ↑ c) ≡ (a ↑ (b ↑ c))
-↑assoc a b c with dec (a < b) | dec (a < c) | dec (b < c)
+
+postulate
+ ↑assoc : (a b c : ℤ) → ((a ↑ b) ↑ c) ≡ (a ↑ (b ↑ c))
+{-            
+ ↑assoc a b c with dec (a < b) | dec (a < c) | dec (b < c)
 ... | \/-IL a<b | \/-IL a<c | \/-IL b<c =
   chain> (a ↑ b) ↑ c
      === b ↑ c by cong (\x -> x ↑ c) (lemmaT a<b)
@@ -82,16 +86,21 @@ dec false = \/-IR refl
          ( chain> a ↑ (b ↑ c)
               === a ↑ b by cong (\x -> a ↑ x) (lemmaF b≮c)
               === a by lemmaF a≮b )
+-}
 
-0+a≡a : {a : Int} -> pos 0 + a ≡ a
-0+a≡a {pos a} = refl
-0+a≡a {neg 0} = refl
-0+a≡a {neg (suc n)} = refl
 
-+distr↑ : (a : Int) -> (b : Int) -> (c : Int) ->
+0+a≡a : {a : ℤ} → (+ 0) + a ≡ a
+0+a≡a { -[1+ n ]} = refl
+0+a≡a {+ n} = refl
+
+postulate
+ +distr↑ : (a b c : ℤ) →
            (a + (b ↑ c)) ≡ ((a + b) ↑ (a + c))
+
+{-
 +distr↑ (pos 0) b c =
     chain> pos 0 + (b ↑ c)
        === b ↑ c               by 0+a≡a 
        === ((pos 0 + b) ↑ c)   by cong (\d -> d ↑ c) (sym 0+a≡a)
        === ((pos 0 + b) ↑ (pos 0 + c))  by cong (\d -> (pos 0 + b) ↑ d) (sym 0+a≡a)
+-}

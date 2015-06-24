@@ -2,6 +2,7 @@ module Examples.MSS.List+ where
 
 open import Sets using (_≡_; refl; sym; cong)
 open import Function
+open import Relations.Function
 open import AlgebraicReasoning.Equality
 open import AlgebraicReasoning.ExtensionalEquality
 
