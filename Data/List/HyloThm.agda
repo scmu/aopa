@@ -53,18 +53,18 @@ hylo-induction-⊒ R r S s X R○FX○S˘⊑X c∈s∧b∈r⇒Xbc b c
   (x ∷ xs , fold-S-x∷xs-c , fold-R-x∷xs-b) =
   (⇐-begin
       foldR R r ○ foldR S s ˘ ⊑ X
-   ⇐⟨ /-universal-⇐ ⟩
+   ⇐⟨ /-universal-⇒ ⟩
       foldR R r ⊑ X / (foldR S s ˘)
    ⇐⟨ (λ next-line →
        foldR-induction-⊒ (X / (foldR S s ˘)) R r 
          (next-line , λ b b∈r → [] , refl , 
                       λ c c∈s → c∈s∧b∈r⇒Xbc b c c∈s b∈r))  ⟩
       R ○ (idR ⨉ (X / (foldR S s ˘))) ⊑ (X / (foldR S s ˘)) ○ cons
-   ⇐⟨ R○f˘⊑S⇒R⊑S○f ⟩
+   ⇐⟨ Rf˘⊑S⇒R⊑Sf ⟩
       (R ○ (idR ⨉ (X / (foldR S s ˘)))) ○ cons ˘ ⊑ X / (foldR S s ˘)
    ⇐⟨ ⊑-trans ○-assocr ⟩
       R ○ (idR ⨉ (X / (foldR S s ˘))) ○ cons ˘ ⊑ X / (foldR S s ˘)
-   ⇐⟨ /-universal-⇒ ⟩
+   ⇐⟨ /-universal-⇐ ⟩
       (R ○ (idR ⨉ (X / (foldR S s ˘))) ○ cons ˘) ○ foldR S s ˘ ⊑ X
    ⇐⟨ ⊑-trans ○-assocr  ⟩
       R ○ ((idR ⨉ (X / (foldR S s ˘))) ○ cons ˘) ○ foldR S s ˘ ⊑ X
@@ -99,7 +99,7 @@ hylo-induction-⊒ R r S s X R○FX○S˘⊑X c∈s∧b∈r⇒Xbc b c
         ⨉-monotonic {R = idR ○ idR}{T = ((X / (foldR S s ˘)) ○ foldR S s ˘)} id-intro-l ⊑-refl ⟩
       R ○ (idR ⨉ ((X / (foldR S s)˘) ○ (foldR S s)˘)) ○ S ˘ ⊑ X
    ⇐⟨ ⊑-trans $ ○-monotonic-r $ ○-monotonic-l $
-          ⨉-monotonic {R = idR} ⊑-refl (/-universal-⇐ {R = (X / (foldR S s)˘)} {S = (foldR S s)˘ } ⊑-refl) ⟩
+          ⨉-monotonic {R = idR} ⊑-refl (/-universal-⇒ {R = (X / (foldR S s)˘)} {S = (foldR S s)˘ } ⊑-refl) ⟩
       R ○ (idR ⨉ X) ○ S ˘ ⊑ X
    ⇐∎) R○FX○S˘⊑X b c (x ∷ xs , fold-S-x∷xs-c , fold-R-x∷xs-b)
 

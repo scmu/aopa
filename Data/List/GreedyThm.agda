@@ -60,11 +60,11 @@ corefl-greedy-thm {A} {B} {S} {s} {R} {C} R○R⊑R C⊑idR S○FR˘○C⊑R˘�
       (min R ₁∘ Λ S) ○ (R ˘ ○ S)˘ ⊑ R
    ⇐⟨ ⊑-trans $ ○-monotonic-r $ ˘-○-distr-⊑ (R ˘) S ⟩
       (min R ₁∘ Λ S) ○ S ˘ ○ R ⊑ R
-   ⇐⟨ ⊑-trans $ ○-monotonic-l $ /-universal-⇒ $ proj₂ $ min-universal-⇒ ⊑-refl ⟩
+   ⇐⟨ ⊑-trans $ ○-monotonic-l $ /-universal-⇐ $ proj₂ $ min-universal-⇒ ⊑-refl ⟩
       (R / (S ˘)) ○ S ˘ ○ R ⊑ R
    ⇐⟨ ⊑-trans ○-assocl ⟩
       ((R / (S ˘)) ○ S ˘) ○ R ⊑ R
-   ⇐⟨ ⊑-trans $ ○-monotonic-l $ /-universal-⇐ ⊑-refl ⟩
+   ⇐⟨ ⊑-trans $ ○-monotonic-l $ /-universal-⇒ ⊑-refl ⟩
       R ○ R ⊑ R
    ⇐∎) R○R⊑R
 

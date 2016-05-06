@@ -11,6 +11,7 @@ open import Relations.Converse
 
 open import AlgebraicReasoning.Relations
 open import AlgebraicReasoning.Implications
+open import AlgebraicReasoning.Equivalence
 
 min : {A : Set} → (A ← A) → (A ← ℙ A)
 min R = ∈ ⊓ (R / ∋)
@@ -36,7 +37,7 @@ min-universal-⇒ {R = R} {S} {X} =
      (X ⊑ S  ×  X ⊑ (R / ∋) ₁∘ Λ S)
    ⇒⟨  ⇒-refl  ⟩   -- /∋○Λ-cancelation-⊑ is deducible by Agda
      (X ⊑ S  ×  X ⊑ (R / S ˘))
-   ⇒⟨  map-× id /-universal-⇐ ⟩
+   ⇒⟨  map-× id /-universal-⇒ ⟩
      (X ⊑ S  ×  X ○ (S ˘) ⊑ R)
    ⇒∎
 
@@ -56,7 +57,7 @@ min-universal-⇐ {R = R} {S} {X} =
      (X ⊑ S  ×  X ⊑ (R / ∋) ₁∘ Λ S)
    ⇐⟨  ⇐-refl  ⟩   -- /∋○Λ-cancelation-⊒ is deducible by Agda
      (X ⊑ S  ×  X ⊑ (R / S ˘))
-   ⇐⟨  map-× id /-universal-⇒ ⟩
+   ⇐⟨  map-× id /-universal-⇐ ⟩
      (X ⊑ S  ×  X ○ (S ˘) ⊑ R)
    ⇐∎
 
@@ -75,9 +76,9 @@ min-monotonic {_}{_} {R} {S} {T} =
   ⇐⟨ (λ next-line → (proj₁ $ min-universal-⇒ ⊑-refl) , next-line) ⟩
     (min R ₁∘ Λ T) ○ T ˘ ⊑ S
   ⇐⟨ ⊑-trans $ ○-monotonic-l $
-        /-universal-⇒ $ proj₂ $ min-universal-⇒ ⊑-refl ⟩
+        /-universal-⇐ $ proj₂ $ min-universal-⇒ ⊑-refl ⟩
     (R / (T ˘)) ○ T ˘ ⊑ S
-  ⇐⟨ ⊑-trans $ /-universal-⇐ ⊑-refl ⟩
+  ⇐⟨ ⊑-trans $ /-universal-⇒ ⊑-refl ⟩
     R ⊑ S
   ⇐∎
 
@@ -110,13 +111,13 @@ minΛ-cong-⊒ {R = R} {S} {T} (S⊑T , S⊒T) =
   ⇐⟨ min-universal-⇐ ⟩
     (min R ₁∘ Λ T ⊑ S × (min R ₁∘ Λ T) ○ S ˘ ⊑ R)
   ⇐⟨ map-× (⊑-trans $ proj₁ $ min-universal-⇒ ⊑-refl)
-            (⊑-trans $ ○-monotonic-l $ /-universal-⇒ $ proj₂ $ min-universal-⇒ ⊑-refl) ⟩
+            (⊑-trans $ ○-monotonic-l $ /-universal-⇐ $ proj₂ $ min-universal-⇒ ⊑-refl) ⟩
     (T ⊑ S × (R / (T ˘)) ○ S ˘ ⊑ R)
   ⇐⟨ (λ next-line → S⊒T , next-line) ⟩
     (R / (T ˘)) ○ S ˘ ⊑ R
   ⇐⟨ ⊑-trans $ ○-monotonic-l $ /-anti-monotonic $ ˘-monotonic-⇐ S⊑T ⟩
     (R / (S ˘)) ○ S ˘ ⊑ R
-  ⇐⟨ ⊑-trans $ /-universal-⇐ ⊑-refl ⟩
+  ⇐⟨ ⊑-trans $ /-universal-⇒ ⊑-refl ⟩
     R ⊑ R
   ⇐∎) ⊑-refl
 
@@ -129,7 +130,7 @@ thin Q = (∈ ﹨ ∈) ⊓ ((∋ ○ Q) / ∋)
 thin-universal-⇐ : {A B : Set} →
    {Q : A ← A} {S : A ← B} → (X : ℙ A ← B) →
      X ⊑ thin Q ₁∘ Λ S → (X ⊑ ∈ ﹨ S  ×  X ○ (S ˘) ⊑ ∋ ○ Q)
-thin-universal-⇐ {Q = Q}{S} X = 
+thin-universal-⇐ {A = A} {Q = Q}{S} X =
    ⇒-begin
      X ⊑ thin Q ₁∘ Λ S
    ⇒⟨  ⇒-refl  ⟩
@@ -142,7 +143,7 @@ thin-universal-⇐ {Q = Q}{S} X =
      (X ⊑ ∈ ﹨ S  ×  X ⊑ ((∋ ○ Q) / ∋) ₁∘ Λ S)
    ⇒⟨  ⇒-refl   ⟩
      (X ⊑ ∈ ﹨ S  ×  X ⊑ (∋ ○ Q) / (S ˘))
-   ⇒⟨  map-× (λ x → x) /-universal-⇐  ⟩
+   ⇒⟨  map-× (λ x → x) /-universal-⇒  ⟩
      (X ⊑ ∈ ﹨ S  ×  X ○ (S ˘) ⊑ ∋ ○ Q)
    ⇒∎
 
