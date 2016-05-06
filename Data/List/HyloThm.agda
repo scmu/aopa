@@ -97,9 +97,9 @@ hylo-induction-⊒ R r S s X R○FX○S˘⊑X c∈s∧b∈r⇒Xbc b c
       R ○ ((idR ○ idR) ⨉ ((X / (foldR S s ˘)) ○ foldR S s ˘)) ○ S ˘ ⊑ X
    ⇐⟨ ⊑-trans $ ○-monotonic-r $ ○-monotonic-l $ 
         ⨉-monotonic {R = idR ○ idR}{T = ((X / (foldR S s ˘)) ○ foldR S s ˘)} id-intro-l ⊑-refl ⟩
-      R ○ (idR ⨉ ((X / (foldR S s)˘) ○ (foldR S s)˘)) ○ S ˘ ⊑ X
+      R ○ (idR ⨉ ((X / (foldR S s ˘)) ○ (foldR S s)˘)) ○ S ˘ ⊑ X
    ⇐⟨ ⊑-trans $ ○-monotonic-r $ ○-monotonic-l $
-          ⨉-monotonic {R = idR} ⊑-refl (/-universal-⇒ {R = (X / (foldR S s)˘)} {S = (foldR S s)˘ } ⊑-refl) ⟩
+          ⨉-monotonic {R = idR} ⊑-refl (/-universal-⇒ {R = (X / (foldR S s ˘))} {S = (foldR S s)˘ } ⊑-refl) ⟩
       R ○ (idR ⨉ X) ○ S ˘ ⊑ X
    ⇐∎) R○FX○S˘⊑X b c (x ∷ xs , fold-S-x∷xs-c , fold-R-x∷xs-b)
 

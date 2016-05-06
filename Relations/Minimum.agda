@@ -36,7 +36,7 @@ min-universal-⇒ {R = R} {S} {X} =
    ⇒⟨  ⇒-refl  ⟩
      (X ⊑ S  ×  X ⊑ (R / ∋) ₁∘ Λ S)
    ⇒⟨  ⇒-refl  ⟩   -- /∋○Λ-cancelation-⊑ is deducible by Agda
-     (X ⊑ S  ×  X ⊑ (R / S ˘))
+     (X ⊑ S  ×  X ⊑ (R / (S ˘)))
    ⇒⟨  map-× id /-universal-⇒ ⟩
      (X ⊑ S  ×  X ○ (S ˘) ⊑ R)
    ⇒∎
@@ -56,7 +56,7 @@ min-universal-⇐ {R = R} {S} {X} =
    ⇐⟨  ⇐-refl  ⟩
      (X ⊑ S  ×  X ⊑ (R / ∋) ₁∘ Λ S)
    ⇐⟨  ⇐-refl  ⟩   -- /∋○Λ-cancelation-⊒ is deducible by Agda
-     (X ⊑ S  ×  X ⊑ (R / S ˘))
+     (X ⊑ S  ×  X ⊑ (R / (S ˘)))
    ⇐⟨  map-× id /-universal-⇐ ⟩
      (X ⊑ S  ×  X ○ (S ˘) ⊑ R)
    ⇐∎

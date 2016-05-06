@@ -66,10 +66,10 @@ R ﹨ S = ((S ˘) / (R ˘)) ˘
 
 /∋○Λ-cancelation-⊒ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} 
                      → (R : B ← A ⊣ l) → (S : A ← C ⊣ i)
-                     → R / ∋ ₁∘ Λ S ⊒ R / S ˘
+                     → R / ∋ ₁∘ Λ S ⊒ R / (S ˘)
 /∋○Λ-cancelation-⊒ R S b c aSc⇒bRa aSc = aSc⇒bRa aSc 
 
 /∋○Λ-cancelation-⊑ : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k} 
                      → (R : B ← A ⊣ l) → (S : A ← C ⊣ i) 
-                     → R / ∋ ₁∘ Λ S ⊑ R / S ˘
+                     → R / ∋ ₁∘ Λ S ⊑ R / (S ˘)
 /∋○Λ-cancelation-⊑ R S b c aSc⇒bRa aSc = aSc⇒bRa aSc
