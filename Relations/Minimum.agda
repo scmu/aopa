@@ -1,5 +1,6 @@
 module Relations.Minimum where
 
+open import Level renaming (_⊔_ to _⊔ℓ_)
 open import Function  using (id; _$_; _∘_)
 open import Data.Product  using (Σ; _×_; _,_; proj₁; proj₂)
          renaming (map to map-×)
@@ -24,8 +25,8 @@ max R = min (R ˘)
 min-universal-⇒ : {A B : Set} →
    {R : A ← A} {S : A ← B} {X : A ← B} →
      X ⊑ min R ₁∘ Λ S → (X ⊑ S  ×  X ○ (S ˘) ⊑ R)
-min-universal-⇒ {R = R} {S} {X} = 
-   ⇒-begin 
+min-universal-⇒ {R = R} {S} {X} =
+   ⇒-begin
      X ⊑ min R ₁∘ Λ S
    ⇒⟨  ⇒-refl  ⟩
      X ⊑ (∈ ⊓ (R / ∋)) ₁∘ Λ S
@@ -45,7 +46,7 @@ min-universal-⇐ : {A B : Set} →
    {R : A ← A} {S : A ← B} {X : A ← B} →
      (X ⊑ S  ×  X ○ (S ˘) ⊑ R) → X ⊑ min R ₁∘ Λ S
 min-universal-⇐ {R = R} {S} {X} =
-   ⇐-begin 
+   ⇐-begin
      X ⊑ min R ₁∘ Λ S
    ⇐⟨  ⇐-refl  ⟩
      X ⊑ (∈ ⊓ (R / ∋)) ₁∘ Λ S
@@ -130,7 +131,7 @@ thin Q = (∈ ﹨ ∈) ⊓ ((∋ ○ Q) / ∋)
 thin-universal-⇐ : {A B : Set} →
    {Q : A ← A} {S : A ← B} → (X : ℙ A ← B) →
      X ⊑ thin Q ₁∘ Λ S → (X ⊑ ∈ ﹨ S  ×  X ○ (S ˘) ⊑ ∋ ○ Q)
-thin-universal-⇐ {A = A} {Q = Q}{S} X =
+thin-universal-⇐ {A = A} {B} {Q = Q}{S} X =
    ⇒-begin
      X ⊑ thin Q ₁∘ Λ S
    ⇒⟨  ⇒-refl  ⟩
@@ -143,7 +144,17 @@ thin-universal-⇐ {A = A} {Q = Q}{S} X =
      (X ⊑ ∈ ﹨ S  ×  X ⊑ ((∋ ○ Q) / ∋) ₁∘ Λ S)
    ⇒⟨  ⇒-refl   ⟩
      (X ⊑ ∈ ﹨ S  ×  X ⊑ (∋ ○ Q) / (S ˘))
-   ⇒⟨  map-× (λ x → x) /-universal-⇒  ⟩
+   ⇒⟨  map-× (λ x → x) univ ⟩
      (X ⊑ ∈ ﹨ S  ×  X ○ (S ˘) ⊑ ∋ ○ Q)
    ⇒∎
+  where /-universal-⇒' : ∀ {i j k l} {A : Set i} {B : Set j} {C : Set k}
+                        → {R : C ← B ⊣ (l ⊔ℓ j ⊔ℓ i)} {S : B ← A ⊣ (l ⊔ℓ j ⊔ℓ i)}
+                          {T : C ← A ⊣ (l ⊔ℓ j ⊔ℓ i)}
+                        → R ⊑ T / S →  R ○ S ⊑ T
+        /-universal-⇒' R⊑T/S c a (b , bSa , cRb) = R⊑T/S c b cRb a bSa
+          -- Same as /-universal-⇒ in Relations.Factor, with a more
+          -- polymorphic type.
 
+        univ : X ⊑ (∋ ○ Q) / (S ˘) → X ○ S ˘ ⊑ ∋ ○ Q
+        univ = /-universal-⇒' {i = zero} {zero} {suc zero} {zero}
+                {A = A} {B = B} {C = A → Set} {R = X} {S = S ˘} {T = ∋ ○ Q}
