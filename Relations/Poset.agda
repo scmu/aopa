@@ -12,6 +12,11 @@ open import Relations
 ≑-isEquivalence = 
   record { refl = ≑-refl ; sym = ≑-sym ; trans = ≑-trans }
 
+≑-Setoid : ∀ {i j k} → Set i → Set j
+           → Setoid (suc k ⊔ℓ (j ⊔ℓ i)) (k ⊔ℓ (j ⊔ℓ i))
+≑-Setoid {k = k} A B =
+  record { Carrier = A ← B ⊣ k ; _≈_ = _≑_ ; isEquivalence = ≑-isEquivalence }
+
 ⊑-refl-≑ :  ∀ {i j k A B} → (_≑_ {i} {j} {k} {A} {B}) ⇒ _⊑_
 ⊑-refl-≑ (R⊑S , S⊑R) = R⊑S
 
