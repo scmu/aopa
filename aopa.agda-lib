@@ -1,0 +1,3 @@
+name: aopa
+include: .
+depend: standard-library
