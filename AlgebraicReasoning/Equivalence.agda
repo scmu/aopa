@@ -6,25 +6,7 @@ open import Level
 open import Data.Product
 open import Relation.Binary hiding (_⇒_)
 open import Function
-open import AlgebraicReasoning.Implications 
-
-import AlgebraicReasoning.MonoPreorderReasoning as MPR
-
-infixr 5 _⇔_ 
-
-
-_⇔_ : ∀ {i} → Set i → Set i → Set i
-A ⇔ B = A ⇒ B × A ⇐ B
-
-⇔-refl : ∀ {i} {A : Set i} → A ⇔ A
-⇔-refl = (id , id) 
-
-⇔-trans : ∀ {i} {A B C : Set i} → (A ⇔ B) → (B ⇔ C) → (A ⇔ C)
-⇔-trans (A⇒B , A⇐B) (B⇒C , B⇐C) = (B⇒C ∘ A⇒B  , A⇐B ∘ B⇐C) 
-
-module ⇔-reasoning {i : Level} = MPR.Mono {suc i} {i} _⇔_ ⇔-refl ⇔-trans
-   renaming (begin_ to ⇔-begin_ ; _∼⟨_⟩_ to _⇔⟨_⟩_ ; _∎ to _⇔∎)
-open ⇔-reasoning public hiding (byDef) 
+open import AlgebraicReasoning.Implications
 
 indirect-equality : 
   ∀ {i j k} {A : Set i} (_≈_ : Rel A j) (_≤_ : Rel A k)

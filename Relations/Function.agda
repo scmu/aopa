@@ -5,6 +5,7 @@ open import Data.Sum      using (_⊎_)
 open import Data.Product  using (_×_; _,_; proj₁ ; proj₂)
   renaming (map to map-×)
 open import Function
+open import Relation.Binary
 
 open import Sets
 open import Relations
@@ -177,7 +178,16 @@ f ≐ g = forall a → f a ≡ g a
   subst (λ b → f a ≡ b) (g≐h a) (f≐g a) 
 
 ≐-trans' : ∀ {i j} {A : Set i} {B : Set j} {f g h : A → B} → f ≐ g → h ≐ f → h ≐ g
-≐-trans' f≐g h≐f = ≐-trans h≐f f≐g 
+≐-trans' f≐g h≐f = ≐-trans h≐f f≐g
+
+≐-isEquivalence : ∀ {i j A B} → IsEquivalence (_≐_ {i} {j} {A} {B})
+≐-isEquivalence =
+  record { refl = ≐-refl ; sym = ≐-sym ; trans = ≐-trans }
+
+≐-Setoid : ∀ {i j} → Set i → Set j
+         → Setoid (i ⊔ℓ j) (i ⊔ℓ j)
+≐-Setoid A B =
+  record { Carrier = A → B ; _≈_ = _≐_ ; isEquivalence = ≐-isEquivalence }
 
 pre-∘-cong : ∀ {i j k} {A : Set i} {B : Set j} {C : Set k} 
              → (f : B → C) → {g h : A → B} → g ≐ h → f ∘ g ≐ f ∘ h

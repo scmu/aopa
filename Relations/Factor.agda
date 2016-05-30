@@ -7,8 +7,7 @@ open import Data.Product  using (_×_; _,_)
 
 open import Sets
 open import Relations
-open import AlgebraicReasoning.Equivalence using (_⇔_)
-open import AlgebraicReasoning.Implications using (⇐-begin_; _⇐⟨_⟩_; _⇐∎)
+open import AlgebraicReasoning.Implications using (_⇔_; ⇐-begin_; _⇐⟨_⟩_; _⇐∎)
 
 _/_ : ∀ {i j k l m} {A : Set i} {B : Set j} {C : Set k} 
       → (B ← A ⊣ l) → (C ← A ⊣ m) → (B ← C ⊣ (i ⊔ℓ l ⊔ℓ m))

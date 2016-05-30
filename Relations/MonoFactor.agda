@@ -8,10 +8,10 @@ open import Data.Product  using (_×_; _,_; ∃; Σ)
 open import Sets
 open import Relations
 open import Relations.Coreflexive
-open import AlgebraicReasoning.Equivalence using (_⇔_)
 open import AlgebraicReasoning.Implications
        using (⇐-begin_; _⇐⟨_⟩_; _⇐∎;
-              ⇒-begin_; _⇒⟨_⟩_; _⇒∎ )
+              ⇒-begin_; _⇒⟨_⟩_; _⇒∎;
+              _⇔_)
 
 -- ranges.
 

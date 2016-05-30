@@ -1,19 +1,17 @@
 module AlgebraicReasoning.Sets where
 
 open import Level
-open import Sets using (ℙ; _⊆_; ⊆-refl; ⊆-trans;
-                           _⊇_; ⊇-refl; ⊇-trans )
+open import Relation.Binary
+open import Data.Product
+open import Sets  {- using (ℙ; _⊆_; ⊆-refl; ⊆-trans;
+                           _⊇_; ⊇-refl; ⊇-trans;
+                           _≗_; ≗-refl; ≗-trans; ≗-sym) -}
+import Relation.Binary.PreorderReasoning as PreR
 
-import AlgebraicReasoning.PolyPreorderReasoning as PPR
+module ⊆-reasoning {ℓ A} = PreR (⊆-Preorder {ℓ} A)
+  renaming (begin_ to ⊆-begin_; _∼⟨_⟩_ to _⊆⟨_⟩_; _∎ to _⊆∎)
+open ⊆-reasoning public  hiding (_IsRelatedTo_; _≈⟨_⟩_; _≈⟨⟩_)
 
-  -- Shall we make it more level-polymorphic?
-
-module ⊆-reasoning {i} = PPR.UnaryCarrier {i} {suc i} ℙ _⊆_ ⊆-refl ⊆-trans
-   renaming (begin_ to ⊆-begin_ ; _∼⟨_⟩_ to _⊆⟨_⟩_ ; _∎ to _⊆∎)
-open ⊆-reasoning public  hiding (byDef)
-
-module ⊇-reasoning {i} = PPR.UnaryCarrier {i} {suc i} ℙ _⊇_ ⊇-refl ⊇-trans
-   renaming (begin_ to ⊇-begin_ ; _∼⟨_⟩_ to _⊇⟨_⟩_ ; _∎ to _⊇∎)
-open ⊇-reasoning public hiding (byDef)
-
-
+module ⊇-reasoning {ℓ A} = PreR (⊇-Preorder {ℓ} A)
+  renaming (begin_ to ⊇-begin_; _∼⟨_⟩_ to _⊇⟨_⟩_; _∎ to _⊇∎)
+open ⊇-reasoning public  hiding (_IsRelatedTo_; _≈⟨_⟩_; _≈⟨⟩_)

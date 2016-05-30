@@ -7,10 +7,8 @@ open import Sets
 open import Relations.Function
 open import Level renaming (_⊔_ to _⊔ℓ_)
 
-import AlgebraicReasoning.PolyPreorderReasoning as PPR
+import Relation.Binary.EqReasoning as EqR
 
-
-module ≐-reasoning {i j} = PPR.BinaryCarrier {i} {j} (λ A B → A → B) 
-  _≐_ ≐-refl ≐-trans
-  renaming (begin_ to ≐-begin_ ; _∼⟨_⟩_ to _≐⟨_⟩_ ; _∎ to _≐∎)
-open ≐-reasoning public
+module ≐-reasoning {i j A B} = EqR (≐-Setoid {i} {j} A B)
+  renaming (begin_ to ≐-begin_ ; _≈⟨_⟩_ to _≐⟨_⟩_ ; _∎ to _≐∎)
+open ≐-reasoning public hiding (_IsRelatedTo_ ; _≡⟨_⟩_; _≡⟨⟩_)
