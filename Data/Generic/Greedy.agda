@@ -41,8 +41,8 @@ greedy-cata F {S = S} {R} isPre SFR˘⊑R˘S =
    ⇐⟨ ⊑-trans (○-monotonic-r FRS˘⊑S˘R) ⟩
      (S ↾ R) ○ (S ˘) ○ R ⊑ R
    ⇐⟨ ⊑-trans (○-monotonic-l (proj₂ (⊓-universal-⇒ ⊑-refl))) ⟩
-     (R / S ˘) ○ (S ˘) ○ R ⊑ R
-    ⇐⟨ ⊑-trans (⇦-mono-l ((R / S ˘) ● (S ˘) ‥) (R ‥) (/-universal-⇒ ⊑-refl)) ⟩
+     (R / (S ˘)) ○ (S ˘) ○ R ⊑ R
+    ⇐⟨ ⊑-trans (⇦-mono-l ((R / (S ˘)) ● (S ˘) ‥) (R ‥) (/-universal-⇒ ⊑-refl)) ⟩
      R ○ R ⊑ R
    ⇐∎) (transitive-○ isPre)
   where

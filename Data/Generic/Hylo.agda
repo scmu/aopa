@@ -66,28 +66,28 @@ hylo-lpfp {F = F} {R} {S} = (pfp , least)
       ⇐-begin
         ⦇ R ⦈ ○ ⦇ S ⦈ ˘ ⊑ X
       ⇐⟨ /-universal-⇒ ⟩
-        ⦇ R ⦈ ⊑ X / ⦇ S ⦈ ˘
-      ⇐⟨ foldR-universal-⇐-⊒ F (X / ⦇ S ⦈ ˘) R ⟩
-        R ○ fmapR F (X / ⦇ S ⦈ ˘) ⊑ (X / ⦇ S ⦈ ˘) ○ fun In
+        ⦇ R ⦈ ⊑ X / (⦇ S ⦈ ˘)
+      ⇐⟨ foldR-universal-⇐-⊒ F (X / (⦇ S ⦈ ˘)) R ⟩
+        R ○ fmapR F (X / (⦇ S ⦈ ˘)) ⊑ (X / (⦇ S ⦈ ˘)) ○ fun In
       ⇐⟨ ⊑-trans id-elim-r ⟩
-        (R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ idR ⊑ (X / ⦇ S ⦈ ˘) ○ fun In
+        (R ○ fmapR F (X / (⦇ S ⦈ ˘))) ○ idR ⊑ (X / (⦇ S ⦈ ˘)) ○ fun In
       ⇐⟨ ⊑-trans (○-monotonic-r fun-entire) ⟩
-        (R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ (fun In ˘) ○ (fun In) ⊑ (X / ⦇ S ⦈ ˘) ○ fun In
-      ⇐⟨ ⇦-mono-l (R ○ fmapR F (X / ⦇ S ⦈ ˘) ● (fun In ˘) ‥) ((X / ⦇ S ⦈ ˘) ‥) ⟩
-        (R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ (fun In ˘) ⊑ X / ⦇ S ⦈ ˘
+        (R ○ fmapR F (X / (⦇ S ⦈ ˘))) ○ (fun In ˘) ○ (fun In) ⊑ (X / (⦇ S ⦈ ˘)) ○ fun In
+      ⇐⟨ ⇦-mono-l (R ○ fmapR F (X / (⦇ S ⦈ ˘)) ● (fun In ˘) ‥) ((X / (⦇ S ⦈ ˘)) ‥) ⟩
+        (R ○ fmapR F (X / (⦇ S ⦈ ˘))) ○ (fun In ˘) ⊑ X / (⦇ S ⦈ ˘)
       ⇐⟨ /-universal-⇐ ⟩
-        ((R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ (fun In ˘)) ○ ⦇ S ⦈ ˘ ⊑ X
+        ((R ○ fmapR F (X / (⦇ S ⦈ ˘))) ○ (fun In ˘)) ○ ⦇ S ⦈ ˘ ⊑ X
       ⇐⟨ ⊑-trans ○-assocr ⟩
-        (R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ (fun In ˘) ○ ⦇ S ⦈ ˘ ⊑ X
+        (R ○ fmapR F (X / (⦇ S ⦈ ˘))) ○ (fun In ˘) ○ ⦇ S ⦈ ˘ ⊑ X
       ⇐⟨ ⊑-trans (○-monotonic-r In˘FS˘⊑FS˘S˘) ⟩
-        (R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ (fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
+        (R ○ fmapR F (X / (⦇ S ⦈ ˘))) ○ (fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
       ⇐⟨ ⊑-trans ○-assocl ⟩
-        ((R ○ fmapR F (X / ⦇ S ⦈ ˘)) ○ fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
+        ((R ○ fmapR F (X / (⦇ S ⦈ ˘))) ○ fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
       ⇐⟨ ⊑-trans (○-monotonic-l ○-assocr) ⟩
-        (R ○ (fmapR F (X / ⦇ S ⦈ ˘)) ○ fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
+        (R ○ (fmapR F (X / (⦇ S ⦈ ˘))) ○ fmapR F (⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
       ⇐⟨ ⊑-trans (○-monotonic-l (⇦-mono-r (R ‥) (fmapR-functor-⊑ F))) ⟩
-        (R ○ fmapR F (X / ⦇ S ⦈ ˘ ○ ⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
-      ⇐⟨ ⊑-trans (⇦-mono-l ((R ○ fmapR F (X / ⦇ S ⦈ ˘ ○ ⦇ S ⦈ ˘)) ‥) (R ● fmapR F X ‥) (○-monotonic-r (fmapR-monotonic F (/-universal-⇒ ⊑-refl)))) ⟩
+        (R ○ fmapR F (X / (⦇ S ⦈ ˘) ○ ⦇ S ⦈ ˘)) ○ S ˘ ⊑ X
+      ⇐⟨ ⊑-trans (⇦-mono-l ((R ○ fmapR F (X / (⦇ S ⦈ ˘) ○ ⦇ S ⦈ ˘)) ‥) (R ● fmapR F X ‥) (○-monotonic-r (fmapR-monotonic F (/-universal-⇒ ⊑-refl)))) ⟩
         R ○ fmapR F X ○ S ˘ ⊑ X
       ⇐∎
      where
